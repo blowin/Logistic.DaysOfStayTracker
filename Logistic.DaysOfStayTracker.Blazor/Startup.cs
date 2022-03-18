@@ -78,6 +78,8 @@ namespace Logistic.DaysOfStayTracker.Blazor
                 .RuleFor(e => e.LastName, e => e.Person.LastName);
 
             const int driverCount = 100;
+
+            var countries = await db.Countries.Select(e => e.Id).ToListAsync();
             
             var drivers = driverFaker.GenerateForever().Take(driverCount).ToList();
             await db.Drivers.AddRangeAsync(drivers);
@@ -88,11 +90,14 @@ namespace Logistic.DaysOfStayTracker.Blazor
                 .Rules((faker, stay) =>
                 {
                     var year = faker.Date.PastOffset();
-                    stay.Start = DateOnly.FromDateTime(year.Date);
-                    stay.End = faker.Date.BetweenDateOnly(stay.Start, stay.Start.AddYears(1));
+                    stay.EntryDate = DateOnly.FromDateTime(year.Date);
+                    stay.ExitDate = faker.Date.BetweenDateOnly(stay.EntryDate, stay.EntryDate.AddYears(1));
+
+                    stay.EntryCountryId = faker.PickRandom(countries);
+                    stay.ExitCountryId = faker.PickRandom(countries.Where(e => e != stay.EntryCountryId));
                 });
 
-            var dayOfStays = dayOfStaysFaker.GenerateForever().Take(5 * driverCount).ToList();
+            var dayOfStays = dayOfStaysFaker.GenerateForever().Take(6 * driverCount).ToList();
             await db.DayOfStays.AddRangeAsync(dayOfStays);
         }
     }

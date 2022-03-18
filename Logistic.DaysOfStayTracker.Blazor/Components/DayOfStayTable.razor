@@ -1,12 +1,16 @@
 ﻿<MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
     <HeaderContent>
-        <MudTh>Водитель</MudTh>
         <MudTh>Дата въезда</MudTh>
+        <MudTh>Страна въезда</MudTh>
         <MudTh>Дата выезда</MudTh>
+        <MudTh>Страна выезда</MudTh>
+        <MudTh>Действия</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Start">@context.Start</MudTd>
-        <MudTd DataLabel="End">@context.End</MudTd>
+        <MudTd DataLabel="Дата въезда">@context.EntryDate</MudTd>
+        <MudTd DataLabel="Страна въезда">@context.EntryCountryName</MudTd>
+        <MudTd DataLabel="Дата выезда">@context.ExitDate</MudTd>
+        <MudTd DataLabel="Страна выезда">@context.ExitCountryName</MudTd>
         <MudTd>
             <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Удалить</MudButton>
         </MudTd>

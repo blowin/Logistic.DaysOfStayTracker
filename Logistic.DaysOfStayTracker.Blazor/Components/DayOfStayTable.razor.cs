@@ -23,7 +23,7 @@ public partial class DayOfStayTable
     [Parameter]
     public DayOfStaySearchRequest SearchRequest { get; set; } = new();
     
-    private IPagedList<DayOfStay> _items = new StaticPagedList<DayOfStay>(Enumerable.Empty<DayOfStay>(), 1, 10, 0);
+    private IPagedList<DayOfStaySearchResponse> _items = new StaticPagedList<DayOfStaySearchResponse>(Enumerable.Empty<DayOfStaySearchResponse>(), 1, 10, 0);
     
     protected override Task OnInitializedAsync()
     {

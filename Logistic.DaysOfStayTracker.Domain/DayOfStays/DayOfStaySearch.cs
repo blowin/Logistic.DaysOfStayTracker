@@ -1,10 +1,11 @@
 ﻿using Logistic.DaysOfStayTracker.Core.Database;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using X.PagedList;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
 
-public record DayOfStaySearchRequest : IRequest<IPagedList<DayOfStay>>
+public record DayOfStaySearchRequest : IRequest<IPagedList<DayOfStaySearchResponse>>
 {
     public int Page { get; set; } = 1;
     public DateTime? Start { get; set; }
@@ -13,7 +14,18 @@ public record DayOfStaySearchRequest : IRequest<IPagedList<DayOfStay>>
     public DateTime? Year { get; set; }
 }
 
-public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequest, IPagedList<DayOfStay>>
+public record DayOfStaySearchResponse
+{
+    public Guid Id { get; set; }
+    public DateOnly EntryDate { get; set; }
+    public DateOnly ExitDate { get; set; }
+
+    public string EntryCountryName { get; set; } = string.Empty;
+    public string ExitCountryName { get; set; } = string.Empty;
+    
+}
+
+public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequest, IPagedList<DayOfStaySearchResponse>>
 {
     private readonly AppDbContext _dbContext;
 
@@ -22,28 +34,30 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
         _dbContext = dbContext;
     }
 
-    public Task<IPagedList<DayOfStay>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
+    public Task<IPagedList<DayOfStaySearchResponse>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
     {
         IQueryable<DayOfStay> query = _dbContext.DayOfStays
-            .OrderByDescending(e => e.Start)
-            .ThenByDescending(e => e.End);
+                .Include(e => e.EntryCountry)
+                .Include(e => e.ExitCountry)
+            .OrderByDescending(e => e.EntryDate)
+            .ThenByDescending(e => e.ExitDate);
 
         if (request.Start.HasValue)
         {
             var start = DateOnly.FromDateTime(request.Start.Value);
-            query = query.Where(e => e.Start <= start && e.End >= start);
+            query = query.Where(e => e.EntryDate <= start && e.ExitDate >= start);
         }
         
         if (request.End.HasValue)
         {
             var end = DateOnly.FromDateTime(request.End.Value);
-            query = query.Where(e => e.Start <= end && e.End >= end);
+            query = query.Where(e => e.EntryDate <= end && e.ExitDate >= end);
         }
 
         if (request.Year.HasValue)
         {
             var year = request.Year.Value.Year;
-            query = query.Where(e => e.Start.Year == year || e.End.Year == year);
+            query = query.Where(e => e.EntryDate.Year == year || e.ExitDate.Year == year);
         }
 
         if (request.DriverId.HasValue)
@@ -52,6 +66,15 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
             query = query.Where(e => e.DriverId == driverId);
         }
 
-        return query.ToPagedListAsync(request.Page, Constants.DefaultPageSize, cancellationToken);
+        return query
+            .Select(dos => new DayOfStaySearchResponse
+            {
+                Id = dos.Id,
+                EntryDate = dos.EntryDate,
+                ExitDate = dos.ExitDate,
+                EntryCountryName = dos.EntryCountry!.Name,
+                ExitCountryName = dos.ExitCountry!.Name,
+            })
+            .ToPagedListAsync(request.Page, Constants.DefaultPageSize, cancellationToken);
     }
 }

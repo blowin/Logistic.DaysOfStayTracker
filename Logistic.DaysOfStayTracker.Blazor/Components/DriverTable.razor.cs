@@ -45,6 +45,7 @@ public partial class DriverTable
 
     private async Task Delete(Guid driverId)
     {
+        // TODO вынести в Mediatr + удалять все связанные сущности
         var entity = await AppContext.Drivers.FindAsync(driverId);
         if(entity == null)
             return;

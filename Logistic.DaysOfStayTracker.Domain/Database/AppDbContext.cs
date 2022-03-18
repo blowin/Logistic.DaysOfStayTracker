@@ -1,4 +1,5 @@
-﻿using Logistic.DaysOfStayTracker.Core.DayOfStays;
+﻿using Logistic.DaysOfStayTracker.Core.Countries;
+using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ public sealed class AppDbContext : DbContext
 
     public DbSet<Driver> Drivers { get; private set; } = null!;
     public DbSet<DayOfStay> DayOfStays { get; private set; } = null!;
+    public DbSet<Country> Countries { get; private set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

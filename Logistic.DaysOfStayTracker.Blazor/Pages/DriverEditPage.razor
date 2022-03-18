@@ -41,6 +41,7 @@
                             <MudDatePicker @ref="_pickerYear" Label="Год" @bind-Date="_dayOfStaySearchRequest.Year" OpenTo="OpenTo.Year" FixDay="1" DateFormat="yyyy" AutoClose="true">
                                 <PickerActions>
                                     <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerYear.Clear())">Удалить</MudButton>
+                                    <MudButton Color="Color.Primary" OnClick="@(() => _pickerYear.Close())">Сохранить</MudButton>
                                 </PickerActions>
                             </MudDatePicker>
                         </MudItem>
