@@ -1,0 +1,26 @@
+﻿@page "/driver/{Id:guid?}"
+
+<MudGrid>
+    <MudCard>
+        <MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary">
+            <MudTabPanel Text="Водитель">
+                <MudForm Model="@_model">
+                    <MudCardContent>
+                        <MudItem xs="4">
+                            <MudTextField @bind-Value="_model.FirstName" For="@(() => _model.FirstName)" Immediate="true" Label="Имя"></MudTextField>
+                        </MudItem>
+                        <MudItem xs="4">
+                            <MudTextField @bind-Value="_model.LastName" For="@(() => _model.LastName)" Immediate="true" Label="Фамилия"></MudTextField>
+                        </MudItem>
+                    </MudCardContent>
+                </MudForm>
+            </MudTabPanel>
+            <MudTabPanel Text="Даты">
+                
+            </MudTabPanel>
+        </MudTabs>
+        <MudCardActions Class="pt-3">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await Submit())">Сохранить</MudButton>
+        </MudCardActions>
+    </MudCard>
+</MudGrid>

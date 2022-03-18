@@ -1,0 +1,20 @@
+﻿@page "/drivers"
+
+<MudGrid Class="mt-4">
+    <MudItem xs="12" sm="12" md="12">
+        <MudText Typo="Typo.h3" Inline="@true">Водители</MudText>
+    </MudItem>
+    <MudItem xs="4">
+            <MudTextField @bind-Value="_searchRequest.FirstName" For="() => _searchRequest.FirstName" Label="Имя"></MudTextField>
+        </MudItem>
+        <MudItem xs="4">
+            <MudTextField @bind-Value="_searchRequest.LastName" For="() => _searchRequest.LastName" Label="Фамилия"></MudTextField>
+        </MudItem>
+    <MudItem xs="4">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await _table.SearchAsync())">Search</MudButton>
+    </MudItem>
+    
+    <MudItem xs="12" sm="12" md="12" Class="pt-4">
+        <DriverTable @ref="_table" SearchRequest="_searchRequest"></DriverTable>
+    </MudItem>
+</MudGrid>
