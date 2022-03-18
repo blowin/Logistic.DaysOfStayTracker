@@ -8,8 +8,8 @@
         <MudTd DataLabel="Имя">@context.FirstName</MudTd>
         <MudTd DataLabel="Фамилия">@context.LastName</MudTd>
         <MudTd>
-            <MudButton Color="Color.Primary" OnClick="() => Edit(context.Id)">Edit</MudButton>
-            <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Delete</MudButton>
+            <MudButton Color="Color.Primary" OnClick="() => Edit(context.Id)">Изменить</MudButton>
+            <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Удалить</MudButton>
         </MudTd>
     </RowTemplate>
     <PagerContent>

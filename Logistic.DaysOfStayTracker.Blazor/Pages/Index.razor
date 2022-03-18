@@ -2,27 +2,19 @@
 
 <MudGrid Class="mt-4">
     <MudItem xs="12" sm="12" md="12">
-        <MudText Typo="Typo.h3" Inline="@true">Даты</MudText>
+        <MudText Typo="Typo.h3" Inline="@true">Водители</MudText>
     </MudItem>
     <MudItem xs="4">
-        <MudDatePicker @ref="_pickerStart" @bind-Date="_searchRequest.Start" Label="Дата въезда" AutoClose="true">
-            <PickerActions>
-                <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerStart.Clear())">Очистить</MudButton>
-            </PickerActions>
-        </MudDatePicker>
+        <MudTextField @bind-Value="_searchRequest.FirstName" For="() => _searchRequest.FirstName" Label="Имя"></MudTextField>
     </MudItem>
     <MudItem xs="4">
-            <MudDatePicker @ref="_pickerEnd" @bind-Date="_searchRequest.End" Label="Дата выезда" AutoClose="true">
-                <PickerActions>
-                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerEnd.Clear())">Очистить</MudButton>
-                </PickerActions>
-            </MudDatePicker>
-        </MudItem>
+        <MudTextField @bind-Value="_searchRequest.LastName" For="() => _searchRequest.LastName" Label="Фамилия"></MudTextField>
+    </MudItem>
     <MudItem xs="4">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await _table.SearchAsync())">Search</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await _table.SearchAsync())">Найти</MudButton>
     </MudItem>
     
     <MudItem xs="12" sm="12" md="12" Class="pt-4">
-        <DayOfStayTable @ref="_table" SearchRequest="_searchRequest"></DayOfStayTable>
+        <DriverTable @ref="_table" SearchRequest="_searchRequest"></DriverTable>
     </MudItem>
 </MudGrid>

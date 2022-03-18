@@ -1,14 +1,11 @@
 ﻿using Logistic.DaysOfStayTracker.Blazor.Components;
-using Logistic.DaysOfStayTracker.Core.DayOfStays;
-using MudBlazor;
+using Logistic.DaysOfStayTracker.Core.Drivers;
 
 namespace Logistic.DaysOfStayTracker.Blazor.Pages;
 
 public partial class Index
 {
-    private DayOfStayTable _table = null!;
-    private MudDatePicker _pickerStart = null!;
-    private MudDatePicker _pickerEnd = null!;
+    private DriverTable _table;
     
-    private DayOfStaySearchRequest _searchRequest = new();
+    private readonly DriverSearchRequest _searchRequest = new();
 }

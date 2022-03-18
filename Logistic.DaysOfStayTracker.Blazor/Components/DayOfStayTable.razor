@@ -1,17 +1,14 @@
-﻿@* ReSharper disable once ConditionIsAlwaysTrueOrFalse *@
-<MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
+﻿<MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
     <HeaderContent>
         <MudTh>Водитель</MudTh>
         <MudTh>Дата въезда</MudTh>
         <MudTh>Дата выезда</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Driver">@context.DriverFullName</MudTd>
         <MudTd DataLabel="Start">@context.Start</MudTd>
         <MudTd DataLabel="End">@context.End</MudTd>
         <MudTd>
-            <MudButton Color="Color.Primary" OnClick="() => Edit(context.Id)">Edit</MudButton>
-            <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Delete</MudButton>
+            <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Удалить</MudButton>
         </MudTd>
     </RowTemplate>
     <PagerContent>

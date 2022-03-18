@@ -4,20 +4,16 @@ using X.PagedList;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
 
-public record DayOfStaySearchRequest : IRequest<IPagedList<DayOfStaySearchResponse>>
+public record DayOfStaySearchRequest : IRequest<IPagedList<DayOfStay>>
 {
     public int Page { get; set; } = 1;
     public DateTime? Start { get; set; }
     public DateTime? End { get; set; }
     public Guid? DriverId { get; set; }
+    public DateTime? Year { get; set; }
 }
 
-public class DayOfStaySearchResponse : DayOfStay
-{
-    public string DriverFullName { get; set; } = string.Empty;
-}
-
-public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequest, IPagedList<DayOfStaySearchResponse>>
+public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequest, IPagedList<DayOfStay>>
 {
     private readonly AppDbContext _dbContext;
 
@@ -26,7 +22,7 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
         _dbContext = dbContext;
     }
 
-    public Task<IPagedList<DayOfStaySearchResponse>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
+    public Task<IPagedList<DayOfStay>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
     {
         IQueryable<DayOfStay> query = _dbContext.DayOfStays
             .OrderByDescending(e => e.Start)
@@ -44,14 +40,18 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
             query = query.Where(e => e.Start <= end && e.End >= end);
         }
 
-        return query.Join(_dbContext.Drivers, stay => stay.DriverId, driver => driver.Id, (stay, driver) => new DayOfStaySearchResponse
-            {
-                Id = stay.Id,
-                Start = stay.Start,
-                End = stay.End,
-                DriverId = stay.DriverId,
-                DriverFullName = driver.FirstName + " " + driver.LastName
-            })
-            .ToPagedListAsync(request.Page, Constants.DefaultPageSize, cancellationToken);
+        if (request.Year.HasValue)
+        {
+            var year = request.Year.Value.Year;
+            query = query.Where(e => e.Start.Year == year || e.End.Year == year);
+        }
+
+        if (request.DriverId.HasValue)
+        {
+            var driverId = request.DriverId.Value;
+            query = query.Where(e => e.DriverId == driverId);
+        }
+
+        return query.ToPagedListAsync(request.Page, Constants.DefaultPageSize, cancellationToken);
     }
 }
