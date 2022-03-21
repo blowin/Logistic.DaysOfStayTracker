@@ -13,10 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Data" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Logistic.DaysOfStayTracker.DependencyInjection\Logistic.DaysOfStayTracker.DependencyInjection.csproj" />
     </ItemGroup>
 

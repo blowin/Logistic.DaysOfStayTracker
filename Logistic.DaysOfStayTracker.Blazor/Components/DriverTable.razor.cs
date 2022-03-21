@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Database;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using MediatR;
@@ -23,7 +24,7 @@ public partial class DriverTable
     [Parameter]
     public DriverSearchRequest SearchRequest { get; set; } = new();
     
-    private IPagedList<Driver> _items = new StaticPagedList<Driver>(Enumerable.Empty<Driver>(), 1, 10, 0);
+    private IPagedList<Driver> _items = Constants.CreateEmptyPagedList<Driver>();
     
     protected override Task OnInitializedAsync()
     {

@@ -1,4 +1,5 @@
 ﻿using Logistic.DaysOfStayTracker.Core.Database;
+using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList;
@@ -75,6 +76,6 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
                 EntryCountryName = dos.EntryCountry!.Name,
                 ExitCountryName = dos.ExitCountry!.Name,
             })
-            .ToPagedListAsync(request.Page, Constants.DefaultPageSize, cancellationToken);
+            .ToPagedListAsync(request.Page, cancellationToken);
     }
 }

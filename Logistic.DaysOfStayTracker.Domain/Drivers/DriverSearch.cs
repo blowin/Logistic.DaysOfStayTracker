@@ -1,4 +1,5 @@
 ﻿using Logistic.DaysOfStayTracker.Core.Database;
+using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using X.PagedList;
 
@@ -31,6 +32,6 @@ public class DriverSearchHandler : IRequestHandler<DriverSearchRequest, IPagedLi
         if (!string.IsNullOrWhiteSpace(request.LastName))
             query = query.Where(e => e.LastName.Contains(request.LastName));
 
-        return query.ToPagedListAsync(request.Page, Constants.DefaultPageSize, cancellationToken);
+        return query.ToPagedListAsync(request.Page, cancellationToken);
     }
 }

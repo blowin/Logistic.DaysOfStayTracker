@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor;
 
-namespace Logistic.DaysOfStayTracker.Blazor.Pages;
+namespace Logistic.DaysOfStayTracker.Blazor.Pages.Drivers;
 
 public partial class DriverEditPage
 {
@@ -18,6 +18,9 @@ public partial class DriverEditPage
     [Inject]
     private AppDbContext AppContext { get; set; } = null!;
 
+    [Inject]
+    private NavigationManager Navigation { get; set; } = null!;
+    
     private Driver _model = null!;
     private readonly DayOfStaySearchRequest _dayOfStaySearchRequest = new()
     {
@@ -60,6 +63,7 @@ public partial class DriverEditPage
         }
 
         await AppContext.SaveChangesAsync();
+        Navigation.NavigateTo("/");
     }
 
     private Task SearchStayOfDateAsync()

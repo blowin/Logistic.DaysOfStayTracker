@@ -7,7 +7,6 @@ public class CountryConfiguration : EntityConfiguration<Country>
 {
     protected override void ConfigureCore(EntityTypeBuilder<Country> builder)
     {
-        // TODO добавить страницу для редактирования стран
         builder.Property(e => e.Name).HasMaxLength(64).IsRequired();
         
         builder.Property(e => e.IsEuropeanUnion).IsRequired();

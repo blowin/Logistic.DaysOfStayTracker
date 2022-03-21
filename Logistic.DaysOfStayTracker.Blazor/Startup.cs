@@ -39,6 +39,7 @@ namespace Logistic.DaysOfStayTracker.Blazor
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
+            //serviceProvider.GetRequiredService<AppNavigation>();
             await using (var scope = serviceProvider.CreateAsyncScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

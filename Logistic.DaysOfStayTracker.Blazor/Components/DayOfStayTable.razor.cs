@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Database;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using MediatR;
@@ -23,7 +24,7 @@ public partial class DayOfStayTable
     [Parameter]
     public DayOfStaySearchRequest SearchRequest { get; set; } = new();
     
-    private IPagedList<DayOfStaySearchResponse> _items = new StaticPagedList<DayOfStaySearchResponse>(Enumerable.Empty<DayOfStaySearchResponse>(), 1, 10, 0);
+    private IPagedList<DayOfStaySearchResponse> _items = Constants.CreateEmptyPagedList<DayOfStaySearchResponse>();
     
     protected override Task OnInitializedAsync()
     {
