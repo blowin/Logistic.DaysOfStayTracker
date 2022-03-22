@@ -45,8 +45,16 @@
                                 </PickerActions>
                             </MudDatePicker>
                         </MudItem>
-                        <MudItem xs="4">
+                        <MudItem xl="12" xs="12" xxl="12">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await SearchStayOfDateAsync())">Найти</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await CalculateRemainDaysAsync())">Подсчитать дни пребывания</MudButton>
+                            @if (_calculateRemainDaysResponse != null)
+                            {
+                                <MudItem xs="4">
+                                    <MudText>В настоящее время @_calculateRemainDaysResponse.RemainDays дней.</MudText>
+                                    <MudText>C @_calculateRemainDaysResponse.DateOfAddDays будет добавляться @_calculateRemainDaysResponse.AddDays дней.</MudText>
+                                </MudItem>
+                            }
                         </MudItem>
                         <MudItem xl="12" xs="12" xxl="12">
                             <DayOfStayTable @ref="_dayOfStayTable" SearchRequest="_dayOfStaySearchRequest"></DayOfStayTable>
