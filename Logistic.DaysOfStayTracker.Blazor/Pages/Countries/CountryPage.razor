@@ -4,6 +4,7 @@
 <MudGrid Class="mt-4">
     <MudItem xs="12" sm="12" md="12">
         <MudText Typo="Typo.h3" Inline="@true">Страны</MudText>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(Create)">+</MudButton>
     </MudItem>
     <MudItem xs="4">
         <MudTextField @bind-Value="_searchRequest.Name" For="() => _searchRequest.Name" Label="Название"></MudTextField>
