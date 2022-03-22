@@ -24,7 +24,7 @@ public sealed class CountrySearchHandler : IRequestHandler<CountrySearchRequest,
 
     public Task<IPagedList<Country>> Handle(CountrySearchRequest request, CancellationToken cancellationToken)
     {
-        IQueryable<Country> query = _context.Countries;
+        IQueryable<Country> query = _context.Countries.OrderBy(e => e.Name);
 
         if (!string.IsNullOrWhiteSpace(request.Name))
             query = query.Where(e => e.Name.Contains(request.Name));

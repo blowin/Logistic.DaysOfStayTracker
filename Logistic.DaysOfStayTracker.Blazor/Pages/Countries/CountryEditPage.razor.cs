@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core.Countries;
-using Logistic.DaysOfStayTracker.Core.Database;
+using MediatR;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 
 namespace Logistic.DaysOfStayTracker.Blazor.Pages.Countries;
 
@@ -13,42 +12,23 @@ public partial class CountryEditPage
     public Guid? Id { get; set; }
     
     [Inject]
-    private AppDbContext AppContext { get; set; } = null!;
-
+    private IMediator Mediator { get; set; } = null!;
+    
     [Inject]
     private NavigationManager Navigation { get; set; } = null!;
     
-    private Country _model = null!;
+    private CountryUpsertRequest _model = null!;
     
     protected override async Task OnInitializedAsync()
     {
-        Country? country = null;
-        if (Id != null)
-        {
-            var id = Id.Value;
-            country = await AppContext.Countries.FirstOrDefaultAsync(r => r.Id == id);
-        }
-
-        country ??= new Country();
-        _model = country;
+        _model = Id == null ? 
+            new CountryUpsertRequest() : 
+            await Mediator.Send(new CountryUpsertModelGet(Id.Value));
     }
 
     private async Task Submit()
     {
-        // TODO validate
-        if (_model.Id == Guid.Empty)
-        {
-            await AppContext.Countries.AddAsync(_model);
-        }
-        else
-        {
-            var updateDriver = await AppContext.Countries.AsTracking().FirstAsync(r => r.Id == _model.Id);
-            updateDriver.Name = _model.Name;
-            updateDriver.IsEuropeanUnion = _model.IsEuropeanUnion;
-            AppContext.Countries.Update(updateDriver);
-        }
-
-        await AppContext.SaveChangesAsync();
+        await Mediator.Send(_model);
         Navigation.NavigateTo("/countries");
     }
 }
