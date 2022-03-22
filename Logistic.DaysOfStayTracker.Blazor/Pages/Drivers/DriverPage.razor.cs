@@ -6,7 +6,7 @@ namespace Logistic.DaysOfStayTracker.Blazor.Pages.Drivers;
 
 public partial class DriverPage
 {
-    private DriverTable _table;
+    private DriverTable _table = null!;
     
     private readonly DriverSearchRequest _searchRequest = new();
 

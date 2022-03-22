@@ -6,7 +6,7 @@ namespace Logistic.DaysOfStayTracker.Blazor.Pages.Countries;
 
 public partial class CountryPage
 {
-    private CountryTable _table;
+    private CountryTable _table = null!;
     
     private readonly CountrySearchRequest _searchRequest = new();
 

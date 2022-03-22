@@ -29,7 +29,7 @@ public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest>
             ? await _db.Countries.AsTracking().FirstAsync(e => e.Id == request.Id, cancellationToken)
             : new Country();
         
-        country.Name = request.Name;
+        country.Name = request.Name ?? string.Empty;
         country.IsEuropeanUnion = request.IsEuropeanUnion;
         
         if (request.Id == null)
