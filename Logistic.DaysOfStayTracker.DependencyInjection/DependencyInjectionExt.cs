@@ -1,4 +1,5 @@
-﻿using Logistic.DaysOfStayTracker.Core.Database;
+﻿using FluentValidation;
+using Logistic.DaysOfStayTracker.Core.Database;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public static class DependencyInjectionExt
     {
         return self
             .AddDbContextPool<AppDbContext>(dbConfiguration)
+            .AddValidatorsFromAssembly(typeof(DayOfStaySearchRequest).Assembly)
             .AddMediatR(typeof(DayOfStaySearchRequest).Assembly);
     }
 }

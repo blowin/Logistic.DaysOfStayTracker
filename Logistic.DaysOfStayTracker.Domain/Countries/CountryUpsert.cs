@@ -1,10 +1,12 @@
-﻿using Logistic.DaysOfStayTracker.Core.Database;
+﻿using CSharpFunctionalExtensions;
+using FluentValidation;
+using Logistic.DaysOfStayTracker.Core.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Logistic.DaysOfStayTracker.Core.Countries;
 
-public class CountryUpsertRequest : IRequest
+public class CountryUpsertRequest : IRequest<Result<Unit, ICollection<string>>>
 {
     public Guid? Id { get; set; }
     public string? Name { get; set; }
@@ -12,16 +14,18 @@ public class CountryUpsertRequest : IRequest
 
 public record CountryUpsertModelGet(Guid Id) : IRequest<CountryUpsertRequest>;
 
-public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest>, IRequestHandler<CountryUpsertModelGet, CountryUpsertRequest>
+public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest, Result<Unit, ICollection<string>>>, IRequestHandler<CountryUpsertModelGet, CountryUpsertRequest>
 {
     private AppDbContext _db;
+    private IEnumerable<IValidator<Country>> _validators;
 
-    public CountryUpsertHandler(AppDbContext db)
+    public CountryUpsertHandler(AppDbContext db, IEnumerable<IValidator<Country>> validators)
     {
         _db = db;
+        _validators = validators;
     }
 
-    public async Task<Unit> Handle(CountryUpsertRequest request, CancellationToken cancellationToken)
+    public async Task<Result<Unit, ICollection<string>>> Handle(CountryUpsertRequest request, CancellationToken cancellationToken)
     {
         // TODO validate
         var country = request.Id != null
@@ -29,6 +33,15 @@ public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest>
             : new Country();
         
         country.Name = request.Name ?? string.Empty;
+        foreach (var validator in _validators)
+        {
+            var result = await validator.ValidateAsync(country, cancellationToken);
+            if (result.IsValid) 
+                continue;
+            
+            var errors = result.Errors.Select(e => e.ErrorMessage).ToList();
+            return Result.Failure<Unit, ICollection<string>>(errors);
+        }
         
         if (request.Id == null)
         {

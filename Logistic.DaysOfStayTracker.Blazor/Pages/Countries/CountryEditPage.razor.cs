@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core.Countries;
 using MediatR;
@@ -18,7 +19,9 @@ public partial class CountryEditPage
     private NavigationManager Navigation { get; set; } = null!;
     
     private CountryUpsertRequest _model = null!;
-    
+
+    private ICollection<string> _errors = Array.Empty<string>();
+
     protected override async Task OnInitializedAsync()
     {
         _model = Id == null ? 
@@ -28,7 +31,15 @@ public partial class CountryEditPage
 
     private async Task Submit()
     {
-        await Mediator.Send(_model);
+        _errors = Array.Empty<string>();
+        
+        var result = await Mediator.Send(_model);
+        if (result.IsFailure)
+        {
+            _errors = result.Error;
+            return;
+        }
+        
         Navigation.NavigateTo("/countries");
     }
 }
