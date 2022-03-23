@@ -1,5 +1,4 @@
 ﻿@page "/countries"
-@using Logistic.DaysOfStayTracker.Core
 
 <MudGrid Class="mt-4">
     <MudItem xs="12" sm="12" md="12">
@@ -8,14 +7,6 @@
     </MudItem>
     <MudItem xs="4">
         <MudTextField @bind-Value="_searchRequest.Name" For="() => _searchRequest.Name" Label="Название"></MudTextField>
-    </MudItem>
-    <MudItem xs="4">
-        <MudSelect @bind-Value="_searchRequest.IsEuropeanUnion" Dense="true" T="SearchBool" Label="Страна евросоюза" Variant="Variant.Text">
-            @foreach (var item in SearchBool.List)
-            {
-                <MudSelectItem Value="@item"/>
-            }
-        </MudSelect>
     </MudItem>
     <MudItem xs="4">
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await _table.SearchAsync())">Найти</MudButton>

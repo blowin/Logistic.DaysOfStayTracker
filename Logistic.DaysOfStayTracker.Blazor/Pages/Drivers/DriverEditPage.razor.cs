@@ -37,6 +37,8 @@ public partial class DriverEditPage
     protected override async Task OnInitializedAsync()
     {
         _model = Id == null ? new DriverUpsertRequest() : await Mediator.Send(new DriverUpsertModelGet(Id.Value));
+        if (Id != null)
+            _dayOfStaySearchRequest.DriverId = Id.Value;
     }
 
     private async Task Submit()

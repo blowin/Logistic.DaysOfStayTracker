@@ -8,9 +8,6 @@
                     <MudItem xs="4">
                         <MudTextField @bind-Value="_model.Name" For="@(() => _model.Name)" Immediate="true" Label="Название"></MudTextField>
                     </MudItem>
-                    <MudItem xs="4">
-                        <MudSwitch @bind-Checked="@_model.IsEuropeanUnion" For="@(() => _model.IsEuropeanUnion)" Label="Страна евросоюза" Color="Color.Primary" />
-                    </MudItem>
                 </MudCardContent>
             </MudForm>
             <MudCardActions Class="pt-3">

@@ -1,13 +1,11 @@
-﻿@using Logistic.DaysOfStayTracker.Core.Extension
+﻿
 <MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
     <HeaderContent>
         <MudTh>Название</MudTh>
-        <MudTh>Страна евросоюза</MudTh>
         <MudTh>Действия</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Имя">@context.Name</MudTd>
-        <MudTd DataLabel="Страна евросоюза">@context.IsEuropeanUnion.ToUserFriendlyString()</MudTd>
         <MudTd>
             <MudButton Color="Color.Primary" OnClick="() => Edit(context.Id)">Изменить</MudButton>
             <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Удалить</MudButton>

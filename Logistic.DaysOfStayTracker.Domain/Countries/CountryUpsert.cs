@@ -8,7 +8,6 @@ public class CountryUpsertRequest : IRequest
 {
     public Guid? Id { get; set; }
     public string? Name { get; set; }
-    public bool IsEuropeanUnion { get; set; }
 }
 
 public record CountryUpsertModelGet(Guid Id) : IRequest<CountryUpsertRequest>;
@@ -30,7 +29,6 @@ public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest>
             : new Country();
         
         country.Name = request.Name ?? string.Empty;
-        country.IsEuropeanUnion = request.IsEuropeanUnion;
         
         if (request.Id == null)
         {
@@ -52,7 +50,6 @@ public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest>
         {
             Id = country.Id,
             Name = country.Name,
-            IsEuropeanUnion = country.IsEuropeanUnion
         };
     }
 }

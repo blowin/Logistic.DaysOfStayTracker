@@ -9,8 +9,6 @@ public record CountrySearchRequest : IRequest<IPagedList<Country>>
 {
     public int Page { get; set; } = 1;
     public string? Name { get; set; }
-    
-    public SearchBool IsEuropeanUnion { get; set; } = SearchBool.All;
 }
 
 public sealed class CountrySearchHandler : IRequestHandler<CountrySearchRequest, IPagedList<Country>>
@@ -28,12 +26,6 @@ public sealed class CountrySearchHandler : IRequestHandler<CountrySearchRequest,
 
         if (!string.IsNullOrWhiteSpace(request.Name))
             query = query.Where(e => e.Name.Contains(request.Name));
-
-        if (request.IsEuropeanUnion.BoolValue.HasValue)
-        {
-            var isEuropeanUnion = request.IsEuropeanUnion.BoolValue.Value;
-            query = query.Where(e => e.IsEuropeanUnion == isEuropeanUnion);
-        }
 
         return query.ToPagedListAsync(request.Page, cancellationToken);
     }

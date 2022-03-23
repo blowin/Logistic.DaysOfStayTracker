@@ -22,17 +22,13 @@ public sealed class CalculateRemainDaysHandler
         // TODO: real calculation
         /*
         var calculateDays = _db.DayOfStays
-            .Include(e => e.EntryCountry)
-            .Include(e => e.ExitCountry)
             .Where(e => e.EntryDate >= request.FromDate && e.ExitDate <= request.ToDate)
-            .Select(r => new DayOfStayDetail(r.EntryDate, r.EntryCountry!.IsEuropeanUnion,
-                r.ExitDate, r.ExitCountry!.IsEuropeanUnion))
+            .Select(r => new DayOfStayDetail(r.EntryDate, r.ExitDate))
             .ToListAsync(cancellationToken: cancellationToken);
         */
         var response = new CalculateRemainDaysResponse(90, DateOnly.FromDateTime(DateTime.Today), 0);
         return Task.FromResult(response);
     }
     
-    public record DayOfStayDetail(DateOnly EntryDate, bool IsEuropeanUnionEntryCountry, 
-        DateOnly ExitDate, bool IsEuropeanUnionExitCountry);
+    public record DayOfStayDetail(DateOnly EntryDate, DateOnly ExitDate);
 }
