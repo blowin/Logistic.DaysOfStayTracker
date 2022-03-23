@@ -1,11 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentValidation;
+using Logistic.DaysOfStayTracker.Core.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Logistic.DaysOfStayTracker.Core.Countries;
 
-public class CountryUpsertRequest : IRequest<Result<Unit, ICollection<string>>>
+public class CountryUpsertRequest : IValidationRequest
 {
     public Guid? Id { get; set; }
     public string? Name { get; set; }
@@ -13,7 +14,7 @@ public class CountryUpsertRequest : IRequest<Result<Unit, ICollection<string>>>
 
 public record CountryUpsertModelGet(Guid Id) : IRequest<CountryUpsertRequest>;
 
-public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest, Result<Unit, ICollection<string>>>, IRequestHandler<CountryUpsertModelGet, CountryUpsertRequest>
+public sealed class CountryUpsertHandler : IValidationRequestHandler<CountryUpsertRequest>, IRequestHandler<CountryUpsertModelGet, CountryUpsertRequest>
 {
     private AppDbContext _db;
     private IEnumerable<IValidator<Country>> _validators;
@@ -26,7 +27,6 @@ public sealed class CountryUpsertHandler : IRequestHandler<CountryUpsertRequest,
 
     public async Task<Result<Unit, ICollection<string>>> Handle(CountryUpsertRequest request, CancellationToken cancellationToken)
     {
-        // TODO validate
         var country = request.Id != null
             ? await _db.Countries.AsTracking().FirstAsync(e => e.Id == request.Id, cancellationToken)
             : new Country();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Blazor.Components;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
@@ -28,6 +29,7 @@ public partial class DriverEditPage
     };
 
     private CalculateRemainDaysResponse? _calculateRemainDaysResponse;
+    private ICollection<string> _errors = Array.Empty<string>();
     
     private MudDatePicker _pickerStart = null!;
     private MudDatePicker _pickerEnd = null!;
@@ -43,7 +45,15 @@ public partial class DriverEditPage
 
     private async Task Submit()
     {
-        await Mediator.Send(_model);
+        _errors = Array.Empty<string>();
+        
+        var result = await Mediator.Send(_model);
+        if (result.IsFailure)
+        {
+            _errors = result.Error;
+            return;
+        }
+        
         Navigation.NavigateTo("/");
     }
 

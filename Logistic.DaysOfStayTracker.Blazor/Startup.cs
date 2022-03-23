@@ -37,17 +37,8 @@ namespace Logistic.DaysOfStayTracker.Blazor
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            //serviceProvider.GetRequiredService<AppNavigation>();
-            await using (var scope = serviceProvider.CreateAsyncScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                await db.Database.EnsureCreatedAsync();
-                await Initialize(db);
-                await db.SaveChangesAsync();
-            }
-            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -69,37 +60,6 @@ namespace Logistic.DaysOfStayTracker.Blazor
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
-        }
-
-        private async Task Initialize(AppDbContext db)
-        {
-            var driverFaker = new Faker<Driver>("ru").UseSeed(8080)
-                .RuleFor(e => e.Id, e => e.Random.Guid())
-                .RuleFor(e => e.FirstName, e => e.Person.FirstName)
-                .RuleFor(e => e.LastName, e => e.Person.LastName);
-
-            const int driverCount = 100;
-
-            var countries = await db.Countries.Select(e => e.Id).ToListAsync();
-            
-            var drivers = driverFaker.GenerateForever().Take(driverCount).ToList();
-            await db.Drivers.AddRangeAsync(drivers);
-
-            var dayOfStaysFaker = new Faker<DayOfStay>("ru").UseSeed(8080)
-                .RuleFor(e => e.Id, e => e.Random.Guid())
-                .RuleFor(e => e.DriverId, e => e.PickRandom(drivers).Id)
-                .Rules((faker, stay) =>
-                {
-                    var year = faker.Date.PastOffset();
-                    stay.EntryDate = DateOnly.FromDateTime(year.Date);
-                    stay.ExitDate = faker.Date.BetweenDateOnly(stay.EntryDate, stay.EntryDate.AddYears(1));
-
-                    stay.EntryCountryId = faker.PickRandom(countries);
-                    stay.ExitCountryId = faker.PickRandom(countries.Where(e => e != stay.EntryCountryId));
-                });
-
-            var dayOfStays = dayOfStaysFaker.GenerateForever().Take(6 * driverCount).ToList();
-            await db.DayOfStays.AddRangeAsync(dayOfStays);
         }
     }
 }
