@@ -29,7 +29,10 @@ public sealed class AppDbContext : DbContext
     
     private async Task Initialize(AppDbContext db)
     {
-        await db.Database.EnsureCreatedAsync();
+        var created = await db.Database.EnsureCreatedAsync();
+        if(!created)
+            return;
+        
         var driverFaker = new Faker<Driver>("ru").UseSeed(8080)
             .RuleFor(e => e.Id, e => e.Random.Guid())
             .RuleFor(e => e.FirstName, e => e.Person.FirstName)
