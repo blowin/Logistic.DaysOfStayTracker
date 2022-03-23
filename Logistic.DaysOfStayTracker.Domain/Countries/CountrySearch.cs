@@ -1,5 +1,4 @@
-﻿using Logistic.DaysOfStayTracker.Core.Database;
-using Logistic.DaysOfStayTracker.Core.Extension;
+﻿using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using X.PagedList;
 

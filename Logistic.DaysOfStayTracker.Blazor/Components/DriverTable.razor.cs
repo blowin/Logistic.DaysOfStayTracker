@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
-using Logistic.DaysOfStayTracker.Core.Database;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using MediatR;
 using Microsoft.AspNetCore.Components;

@@ -1,4 +1,6 @@
-﻿namespace Logistic.DaysOfStayTracker.Core.Countries;
+﻿using Logistic.DaysOfStayTracker.Core.Common;
+
+namespace Logistic.DaysOfStayTracker.Core.Countries;
 
 public class Country : Entity
 {

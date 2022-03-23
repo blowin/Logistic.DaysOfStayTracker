@@ -3,7 +3,7 @@ using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using Microsoft.EntityFrameworkCore;
 
-namespace Logistic.DaysOfStayTracker.Core.Database;
+namespace Logistic.DaysOfStayTracker.Core;
 
 public sealed class AppDbContext : DbContext
 {

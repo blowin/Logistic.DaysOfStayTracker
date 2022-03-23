@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Logistic.DaysOfStayTracker.Core.Database.Configuration;
+namespace Logistic.DaysOfStayTracker.Core.Common;
 
 public abstract class EntityConfiguration<TEntity> : IEntityTypeConfiguration<TEntity>
     where TEntity : Entity

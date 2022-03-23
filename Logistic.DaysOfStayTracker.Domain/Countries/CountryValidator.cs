@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using Logistic.DaysOfStayTracker.Core.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace Logistic.DaysOfStayTracker.Core.Countries;

@@ -1,5 +1,4 @@
-﻿using Logistic.DaysOfStayTracker.Core.Database;
-using MediatR;
+﻿using MediatR;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
 

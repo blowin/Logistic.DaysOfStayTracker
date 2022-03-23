@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Countries;
-using Logistic.DaysOfStayTracker.Core.Database;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using X.PagedList;

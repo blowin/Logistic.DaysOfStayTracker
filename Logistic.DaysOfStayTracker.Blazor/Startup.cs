@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
-using Logistic.DaysOfStayTracker.Core.Database;
+using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.DependencyInjection;

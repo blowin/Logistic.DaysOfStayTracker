@@ -1,4 +1,4 @@
-﻿namespace Logistic.DaysOfStayTracker.Core;
+﻿namespace Logistic.DaysOfStayTracker.Core.Common;
 
 public class Entity
 {

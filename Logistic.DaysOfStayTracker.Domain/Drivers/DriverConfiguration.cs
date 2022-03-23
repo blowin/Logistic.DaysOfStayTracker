@@ -1,7 +1,7 @@
-﻿using Logistic.DaysOfStayTracker.Core.Drivers;
+﻿using Logistic.DaysOfStayTracker.Core.Common;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Logistic.DaysOfStayTracker.Core.Database.Configuration;
+namespace Logistic.DaysOfStayTracker.Core.Drivers;
 
 public class DriverConfiguration : EntityConfiguration<Driver>
 {

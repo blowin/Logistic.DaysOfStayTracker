@@ -1,6 +1,6 @@
 ﻿using Ardalis.SmartEnum;
 
-namespace Logistic.DaysOfStayTracker.Core;
+namespace Logistic.DaysOfStayTracker.Core.Common;
 
 public class SearchBool : SmartEnum<SearchBool>
 {

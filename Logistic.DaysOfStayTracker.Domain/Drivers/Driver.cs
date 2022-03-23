@@ -1,4 +1,6 @@
-﻿namespace Logistic.DaysOfStayTracker.Core.Drivers;
+﻿using Logistic.DaysOfStayTracker.Core.Common;
+
+namespace Logistic.DaysOfStayTracker.Core.Drivers;
 
 public class Driver : Entity
 {

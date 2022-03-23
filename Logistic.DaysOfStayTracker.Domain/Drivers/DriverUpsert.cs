@@ -1,5 +1,4 @@
-﻿using Logistic.DaysOfStayTracker.Core.Database;
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Logistic.DaysOfStayTracker.Core.Drivers;

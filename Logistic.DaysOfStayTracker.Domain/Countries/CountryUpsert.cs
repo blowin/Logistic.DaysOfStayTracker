@@ -1,6 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentValidation;
-using Logistic.DaysOfStayTracker.Core.Database;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
