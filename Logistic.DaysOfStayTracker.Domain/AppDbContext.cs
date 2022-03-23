@@ -58,9 +58,16 @@ public sealed class AppDbContext : DbContext
                 stay.ExitCountryId = faker.PickRandom(countries.Where(e => e != stay.EntryCountryId));
             });
 
-        var dayOfStays = dayOfStaysFaker.GenerateForever().Take(6 * driverCount).ToList();
-        await db.DayOfStays.AddRangeAsync(dayOfStays);
-        
+        var f = new Faker();
+        Randomizer.Seed = new Random(8080);
+        foreach (var driver in drivers)
+        {
+            var dayOfStays = dayOfStaysFaker.GenerateForever().Take(f.Random.Int(12, 60)).ToList();
+            foreach (var dayOfStay in dayOfStays)
+                dayOfStay.DriverId = driver.Id;
+            await db.DayOfStays.AddRangeAsync(dayOfStays);   
+        }
+
         await db.SaveChangesAsync();
     }
 }

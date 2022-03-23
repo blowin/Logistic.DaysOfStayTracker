@@ -1,13 +1,11 @@
-﻿using Logistic.DaysOfStayTracker.Core.Extension;
-using MediatR;
+﻿using CSharpFunctionalExtensions;
+using Logistic.DaysOfStayTracker.Core.Common;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
 
-public record DayOfStaySearchRequest : IRequest<IPagedList<DayOfStaySearchResponse>>
+public record DayOfStaySearchRequest : IValidationRequest<List<DayOfStaySearchResponse>>
 {
-    public int Page { get; set; } = 1;
     public DateTime? Start { get; set; }
     public DateTime? End { get; set; }
     public Guid? DriverId { get; set; }
@@ -25,7 +23,7 @@ public record DayOfStaySearchResponse
     
 }
 
-public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequest, IPagedList<DayOfStaySearchResponse>>
+public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStaySearchRequest, List<DayOfStaySearchResponse>>
 {
     private readonly AppDbContext _dbContext;
 
@@ -34,8 +32,16 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
         _dbContext = dbContext;
     }
 
-    public Task<IPagedList<DayOfStaySearchResponse>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<DayOfStaySearchResponse>, ICollection<string>>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
     {
+        if (request.End == null && request.Start == null && request.Year == null)
+        {
+            return Result.Failure<List<DayOfStaySearchResponse>, ICollection<string>>(new List<string>
+            {
+                "Необходимо указать как минимум один фильтр"
+            });
+        }
+
         IQueryable<DayOfStay> query = _dbContext.DayOfStays
                 .Include(e => e.EntryCountry)
                 .Include(e => e.ExitCountry)
@@ -66,7 +72,7 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
             query = query.Where(e => e.DriverId == driverId);
         }
 
-        return query
+        return await query
             .Select(dos => new DayOfStaySearchResponse
             {
                 Id = dos.Id,
@@ -75,6 +81,6 @@ public sealed class DayOfStaySearchHandler : IRequestHandler<DayOfStaySearchRequ
                 EntryCountryName = dos.EntryCountry!.Name,
                 ExitCountryName = dos.ExitCountry!.Name,
             })
-            .ToPagedListAsync(request.Page, cancellationToken);
+            .ToListAsync(cancellationToken);
     }
 }

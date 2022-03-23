@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using MediatR;
@@ -23,22 +25,19 @@ public partial class DayOfStayTable
     [Parameter]
     public DayOfStaySearchRequest SearchRequest { get; set; } = new();
     
-    private IPagedList<DayOfStaySearchResponse> _items = Constants.CreateEmptyPagedList<DayOfStaySearchResponse>();
-    
+    private IList<DayOfStaySearchResponse> _items = Array.Empty<DayOfStaySearchResponse>();
+    private ICollection<string>? _errors;
+
     protected override Task OnInitializedAsync()
     {
         return SearchAsync();
     }
     
-    private Task PageChanged(int page)
-    {
-        SearchRequest.Page = page;
-        return SearchAsync();
-    }
-
     public async Task SearchAsync()
     {
-        _items = await Mediator.Send(SearchRequest);
+        _errors = null;
+        var result = await Mediator.Send(SearchRequest);
+        result.Match(list => _items = list, errors => _errors = errors);
     }
 
     private async Task Delete(Guid dayOfStayId)
