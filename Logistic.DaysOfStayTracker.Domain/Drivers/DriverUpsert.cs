@@ -3,6 +3,7 @@ using FluentValidation;
 using Logistic.DaysOfStayTracker.Core.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Logistic.DaysOfStayTracker.Core.Drivers;
 
@@ -21,11 +22,13 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
 {
     private AppDbContext _db;
     private IEnumerable<IValidator<Driver>> _validators;
+    private ILogger<DriverUpsertHandler> _logger;
 
-    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> validators)
+    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> validators, ILogger<DriverUpsertHandler> logger)
     {
         _db = db;
         _validators = validators;
+        _logger = logger;
     }
 
     public async Task<Result<Unit, ICollection<string>>> Handle(DriverUpsertRequest request, CancellationToken cancellationToken)
@@ -73,6 +76,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
         }
         catch (Exception e)
         {
+            _logger.LogError(e, "{@Request}", request);
             await transaction.RollbackAsync(cancellationToken);
         }
         return Unit.Value;
