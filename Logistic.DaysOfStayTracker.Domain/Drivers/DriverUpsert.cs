@@ -11,6 +11,8 @@ public class DriverUpsertRequest : IValidationRequest
     public Guid? Id { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+
+    public HashSet<Guid> DeletedDayOfStays { get; set; } = new();
 }
 
 public record DriverUpsertModelGet(Guid Id) : IRequest<DriverUpsertRequest>;
@@ -44,17 +46,35 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             var errors = result.Errors.Select(e => e.ErrorMessage).ToList();
             return Result.Failure<Unit, ICollection<string>>(errors);
         }
-        
-        if (request.Id == null)
+
+        var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+        try
         {
-            await _db.Drivers.AddAsync(driver, cancellationToken);
-        }
-        else
-        {
-            _db.Drivers.Update(driver);   
-        }
+            if (request.DeletedDayOfStays.Count > 0)
+            {
+                var removeDayOfStays = _db.DayOfStays.AsTracking()
+                    .Where(e => request.DeletedDayOfStays.Contains(e.Id));
+
+                _db.DayOfStays.RemoveRange(removeDayOfStays);
+            }
+            
+            if (request.Id == null)
+            {
+                await _db.Drivers.AddAsync(driver, cancellationToken);
+            }
+            else
+            {
+                _db.Drivers.Update(driver);   
+            }
         
-        await _db.SaveChangesAsync(cancellationToken);
+            await _db.SaveChangesAsync(cancellationToken);
+            
+            await transaction.CommitAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+        }
         return Unit.Value;
     }
 

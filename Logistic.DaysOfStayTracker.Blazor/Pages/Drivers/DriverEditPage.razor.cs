@@ -70,4 +70,9 @@ public partial class DriverEditPage
     {
         _calculateRemainDaysResponse = await Mediator.Send(new CalculateRemainDaysRequest());
     }
+
+    private void DeleteDayOfStays(Guid id)
+    {
+        _model.DeletedDayOfStays.Add(id);
+    }
 }
