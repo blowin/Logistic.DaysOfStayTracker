@@ -12,6 +12,9 @@
         </MudItem>   
     }
     <MudItem xl="12" xs="12" xxl="12">
+        <MudButton OnClick="AddDayOfStay">Добавить</MudButton>
+    </MudItem>
+    <MudItem xl="12" xs="12" xxl="12">
         <MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
             <HeaderContent>
                 <MudTh>Дата въезда</MudTh>
@@ -22,11 +25,11 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Дата въезда">@context.EntryDate</MudTd>
-                <MudTd DataLabel="Страна въезда">@context.EntryCountryName</MudTd>
+                <MudTd DataLabel="Страна въезда">@(_countries[context.EntryCountryId].Name)</MudTd>
                 <MudTd DataLabel="Дата выезда">@context.ExitDate</MudTd>
-                <MudTd DataLabel="Страна выезда">@context.ExitCountryName</MudTd>
+                <MudTd DataLabel="Страна выезда">@(_countries[context.ExitCountryId].Name)</MudTd>
                 <MudTd>
-                    <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Удалить</MudButton>
+                    <MudButton Color="Color.Primary" OnClick="@(() => Delete(context))">Удалить</MudButton>
                 </MudTd>
             </RowTemplate>
             <PagerContent>

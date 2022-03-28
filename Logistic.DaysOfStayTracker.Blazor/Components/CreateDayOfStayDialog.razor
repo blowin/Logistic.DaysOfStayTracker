@@ -1,0 +1,99 @@
+﻿@using Logistic.DaysOfStayTracker.Core.Countries
+@using Logistic.DaysOfStayTracker.Core.DayOfStays
+
+<MudDialog>
+    <DialogContent>
+        @if (!string.IsNullOrEmpty(_errorMessage))
+        {
+            <MudText Color="Color.Error">@_errorMessage</MudText>
+        }
+        <MudSelect @bind-Value="@_entryCountry" T="Country" Label="Страна въезда" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Required="true">
+            @foreach (var country in Countries)
+            {
+                <MudSelectItem Value="@country">@country.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudDatePicker @bind-Date="@_entryDate" Label="Дата въезда" Required="true"></MudDatePicker>
+
+        <MudSelect Class="pt-5" @bind-Value="@_exitCountry" T="Country" Label="Страна выезда" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Required="true">
+            @foreach (var country in Countries)
+            {
+                <MudSelectItem Value="@country">@country.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudDatePicker @bind-Date="@_exitDate" Label="Дата выезда" Required="true"></MudDatePicker>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Отмена</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Добавить</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    private string _errorMessage = string.Empty;
+
+    private Country _entryCountry = null!;
+    private DateTime? _exitDate = DateTime.Now;
+    
+    private Country _exitCountry = null!;
+    private DateTime? _entryDate = DateTime.Now;
+
+    [Parameter]
+    public IReadOnlyList<Country> Countries { get; set; } = Array.Empty<Country>();
+    
+    [Parameter]
+    public Guid DriverId { get; set; }
+
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        _entryCountry = Countries.First();
+        _exitCountry = Countries.First();
+    }
+
+    void Submit()
+    {
+        _errorMessage = string.Empty;
+        if (_entryDate == null)
+        {
+            _errorMessage = "Необходимо указать дату въезда";
+            return;
+        }
+
+        if (_exitDate == null)
+        {
+            _errorMessage = "Необходимо указать дату выезда";
+            return;
+        }
+
+        var entryDate = DateOnly.FromDateTime(_entryDate.Value.ToLocalTime());
+        var exitDate = DateOnly.FromDateTime(_exitDate.Value.ToLocalTime());
+        var createResult = DayOfStay.Create(DriverId, _entryCountry.Id, entryDate, _exitCountry.Id, exitDate);
+        if (createResult.IsFailure)
+        {
+            _errorMessage = createResult.Error;
+            return;
+        }
+        
+        CloseOk(createResult.Value);
+    }
+    
+    void Cancel() => MudDialog.Cancel();
+
+    private void CloseOk(DayOfStay result)
+    {
+        var dialogResult = DialogResult.Ok(result);
+        MudDialog.Close(dialogResult);
+    }
+    
+    public static DialogParameters CreateParameters(IReadOnlyList<Country> countries, Guid driverId)
+    {
+        var parameters = new DialogParameters
+        {
+            {nameof(Countries), countries},
+            {nameof(DriverId), driverId},
+        };
+        return parameters;
+    }
+}

@@ -4,9 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Logistic.DaysOfStayTracker.Core;
+using Logistic.DaysOfStayTracker.Core.Countries;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
+using Logistic.DaysOfStayTracker.Core.Drivers;
 using MediatR;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using X.PagedList;
 
 namespace Logistic.DaysOfStayTracker.Blazor.Components;
@@ -15,23 +18,32 @@ public partial class DayOfStayTable
 {
     [Inject]
     private IMediator Mediator { get; set; } = null!;
-    
+
     [Inject]
     private NavigationManager NavigationManager { get; set; } = null!;
-    
-    [Parameter]
-    public EventCallback<Guid> OnDelete { get; set; }
 
     [Parameter]
     public DayOfStaySearchRequest SearchRequest { get; set; } = new();
 
-    private HashSet<Guid> _deleted = new();
-    private List<DayOfStaySearchResponse> _items = new();
-    private ICollection<string>? _errors;
+    [Parameter]
+    public DriverUpsertRequest DriverUpsertRequest { get; set; } = new();
 
-    protected override Task OnInitializedAsync()
+    [Inject]
+    public IDialogService DialogService { get; set; } = null!;
+
+    [Inject]
+    public AppDbContext Context { get; set; } = null!;
+    
+    private List<DayOfStay> _items = new();
+    private ICollection<string>? _errors;
+    private Dictionary<Guid, Country> _countries = null!;
+
+    protected override async Task OnInitializedAsync()
     {
-        return SearchAsync();
+        var countries = await Context.Countries.ToListAsync();
+        _countries = countries.ToDictionary(e => e.Id);
+        
+        await SearchAsync();
     }
     
     public async Task SearchAsync()
@@ -43,19 +55,42 @@ public partial class DayOfStayTable
             {
                 _items = list;
                 ApplyDeleteItems();
+                _items.AddRange(DriverUpsertRequest.CreateDayOfStays);
             }, 
             errors => _errors = errors);
     }
 
-    private Task Delete(Guid dayOfStayId)
+    private void Delete(DayOfStay dayOfStay)
     {
-        _deleted.Add(dayOfStayId);
+        _items.Remove(dayOfStay);
+        DriverUpsertRequest.AddDeletedDayOfStay(dayOfStay);
         ApplyDeleteItems();
-        return OnDelete.InvokeAsync(dayOfStayId);
     }
 
     private void ApplyDeleteItems()
     {
-        _items.RemoveAll(response => _deleted.Contains(response.Id));
+        _items.RemoveAll(response => DriverUpsertRequest.DeletedDayOfStays.ContainsKey(response.Id));
+    }
+
+    private async Task AddDayOfStay()
+    {
+        var op = new DialogOptions{ FullWidth = true };
+
+        if (_countries.Count == 0)
+        {
+            var countries = await Context.Countries.ToListAsync();
+            _countries = countries.ToDictionary(e => e.Id);
+        }
+        var parameters = CreateDayOfStayDialog.CreateParameters(_countries.Select(e => e.Value).ToList(), 
+            SearchRequest.DriverId ?? Guid.Empty);
+        
+        var dialog = DialogService.Show<CreateDayOfStayDialog>("Создать", parameters, op);
+        var result = await dialog.Result;
+        if(result.Cancelled)
+            return;
+
+        var createModel = (DayOfStay) result.Data;
+        DriverUpsertRequest.CreateDayOfStays.Add(createModel);
+        _items.Add(createModel);
     }
 }

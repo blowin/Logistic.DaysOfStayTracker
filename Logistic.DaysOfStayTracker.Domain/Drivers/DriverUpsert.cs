@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentValidation;
 using Logistic.DaysOfStayTracker.Core.Common;
+using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,16 +14,27 @@ public class DriverUpsertRequest : IValidationRequest
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
 
-    public HashSet<Guid> DeletedDayOfStays { get; set; } = new();
+    public Dictionary<Guid, DayOfStay> DeletedDayOfStays { get; } = new();
+
+    public HashSet<DayOfStay> CreateDayOfStays { get; } = new();
+
+    public bool AddDeletedDayOfStay(DayOfStay dayOfStay)
+    {
+        if(CreateDayOfStays.Remove(dayOfStay))
+            return false;
+
+        DeletedDayOfStays.Add(dayOfStay.Id, dayOfStay);
+        return true;
+    }
 }
 
 public record DriverUpsertModelGet(Guid Id) : IRequest<DriverUpsertRequest>;
 
 public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsertRequest>, IRequestHandler<DriverUpsertModelGet, DriverUpsertRequest>
 {
-    private AppDbContext _db;
-    private IEnumerable<IValidator<Driver>> _validators;
-    private ILogger<DriverUpsertHandler> _logger;
+    private readonly AppDbContext _db;
+    private readonly IEnumerable<IValidator<Driver>> _validators;
+    private readonly ILogger<DriverUpsertHandler> _logger;
 
     public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> validators, ILogger<DriverUpsertHandler> logger)
     {
@@ -56,11 +68,14 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             if (request.DeletedDayOfStays.Count > 0)
             {
                 var removeDayOfStays = _db.DayOfStays.AsTracking()
-                    .Where(e => request.DeletedDayOfStays.Contains(e.Id));
+                    .Where(e => request.DeletedDayOfStays.ContainsKey(e.Id));
 
                 _db.DayOfStays.RemoveRange(removeDayOfStays);
             }
-            
+
+            if (request.CreateDayOfStays.Count > 0)
+                await _db.DayOfStays.AddRangeAsync(request.CreateDayOfStays, cancellationToken);
+
             if (request.Id == null)
             {
                 await _db.Drivers.AddAsync(driver, cancellationToken);

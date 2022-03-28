@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
 
-public record DayOfStaySearchRequest : IValidationRequest<List<DayOfStaySearchResponse>>
+public record DayOfStaySearchRequest : IValidationRequest<List<DayOfStay>>
 {
     public DateTime? Start { get; set; }
     public DateTime? End { get; set; }
@@ -12,18 +12,7 @@ public record DayOfStaySearchRequest : IValidationRequest<List<DayOfStaySearchRe
     public DateTime? Year { get; set; }
 }
 
-public record DayOfStaySearchResponse
-{
-    public Guid Id { get; set; }
-    public DateOnly EntryDate { get; set; }
-    public DateOnly ExitDate { get; set; }
-
-    public string EntryCountryName { get; set; } = string.Empty;
-    public string ExitCountryName { get; set; } = string.Empty;
-    
-}
-
-public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStaySearchRequest, List<DayOfStaySearchResponse>>
+public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStaySearchRequest, List<DayOfStay>>
 {
     private readonly AppDbContext _dbContext;
 
@@ -32,19 +21,17 @@ public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStay
         _dbContext = dbContext;
     }
 
-    public async Task<Result<List<DayOfStaySearchResponse>, ICollection<string>>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<DayOfStay>, ICollection<string>>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
     {
         if (request.End == null && request.Start == null && request.Year == null)
         {
-            return Result.Failure<List<DayOfStaySearchResponse>, ICollection<string>>(new List<string>
+            return Result.Failure<List<DayOfStay>, ICollection<string>>(new List<string>
             {
                 "Необходимо указать как минимум один фильтр"
             });
         }
 
         IQueryable<DayOfStay> query = _dbContext.DayOfStays
-                .Include(e => e.EntryCountry)
-                .Include(e => e.ExitCountry)
             .OrderByDescending(e => e.EntryDate)
             .ThenByDescending(e => e.ExitDate);
 
@@ -72,15 +59,6 @@ public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStay
             query = query.Where(e => e.DriverId == driverId);
         }
 
-        return await query
-            .Select(dos => new DayOfStaySearchResponse
-            {
-                Id = dos.Id,
-                EntryDate = dos.EntryDate,
-                ExitDate = dos.ExitDate,
-                EntryCountryName = dos.EntryCountry!.Name,
-                ExitCountryName = dos.ExitCountry!.Name,
-            })
-            .ToListAsync(cancellationToken);
+        return await query.ToListAsync(cancellationToken);
     }
 }

@@ -12,9 +12,6 @@ public sealed class AppDbContext : DbContext
         : base(options)
     {
         ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-#pragma warning disable CS4014
-        Initialize(this);
-#pragma warning restore CS4014
     }
 
     public DbSet<Driver> Drivers { get; private set; } = null!;
@@ -27,25 +24,23 @@ public sealed class AppDbContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
     
-    private async Task Initialize(AppDbContext db)
+    public async Task Initialize()
     {
-        var created = await db.Database.EnsureCreatedAsync();
-        if(!created)
-            return;
-        
         var driverFaker = new Faker<Driver>("ru").UseSeed(8080)
+            .CustomInstantiator(_ => new Driver())
             .RuleFor(e => e.Id, e => e.Random.Guid())
             .RuleFor(e => e.FirstName, e => e.Person.FirstName)
             .RuleFor(e => e.LastName, e => e.Person.LastName);
 
         const int driverCount = 100;
 
-        var countries = await db.Countries.Select(e => e.Id).ToListAsync();
+        var countries = await Countries.Select(e => e.Id).ToListAsync();
             
         var drivers = driverFaker.GenerateForever().Take(driverCount).ToList();
-        await db.Drivers.AddRangeAsync(drivers);
+        await Drivers.AddRangeAsync(drivers);
 
         var dayOfStaysFaker = new Faker<DayOfStay>("ru").UseSeed(8080)
+            .CustomInstantiator(_ => new DayOfStay())
             .RuleFor(e => e.Id, e => e.Random.Guid())
             .RuleFor(e => e.DriverId, e => e.PickRandom(drivers).Id)
             .Rules((faker, stay) =>
@@ -65,9 +60,9 @@ public sealed class AppDbContext : DbContext
             var dayOfStays = dayOfStaysFaker.GenerateForever().Take(f.Random.Int(12, 60)).ToList();
             foreach (var dayOfStay in dayOfStays)
                 dayOfStay.DriverId = driver.Id;
-            await db.DayOfStays.AddRangeAsync(dayOfStays);   
+            await DayOfStays.AddRangeAsync(dayOfStays);   
         }
 
-        await db.SaveChangesAsync();
+        await SaveChangesAsync();
     }
 }
