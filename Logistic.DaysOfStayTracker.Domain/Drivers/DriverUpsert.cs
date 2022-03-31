@@ -18,13 +18,12 @@ public class DriverUpsertRequest : IValidationRequest
 
     public HashSet<DayOfStay> CreateDayOfStays { get; } = new();
 
-    public bool AddDeletedDayOfStay(DayOfStay dayOfStay)
+    public void AddDeletedDayOfStay(DayOfStay dayOfStay)
     {
         if(CreateDayOfStays.Remove(dayOfStay))
-            return false;
+            return;
 
         DeletedDayOfStays.Add(dayOfStay.Id, dayOfStay);
-        return true;
     }
 }
 
