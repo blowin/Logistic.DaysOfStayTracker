@@ -1,15 +1,9 @@
 using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Bogus;
 using Logistic.DaysOfStayTracker.Core;
-using Logistic.DaysOfStayTracker.Core.DayOfStays;
-using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -36,8 +30,8 @@ namespace Logistic.DaysOfStayTracker.Blazor
 
             services.AddAppServices(builder =>
             {
-                builder.UseInMemoryDatabase("db")
-                    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                //builder.UseInMemoryDatabase("db").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+                builder.UseSqlite("Data Source=app.db");
             });
         }
 
@@ -48,7 +42,7 @@ namespace Logistic.DaysOfStayTracker.Blazor
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 db.Database.EnsureCreated();
-                db.Initialize().ConfigureAwait(false).GetAwaiter().GetResult();
+                //db.Initialize().ConfigureAwait(false).GetAwaiter().GetResult();
             }
             
             if (env.IsDevelopment())

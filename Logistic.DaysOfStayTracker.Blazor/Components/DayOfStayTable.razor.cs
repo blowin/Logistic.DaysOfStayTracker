@@ -37,11 +37,23 @@ public partial class DayOfStayTable
     private List<DayOfStay> _items = new();
     private ICollection<string>? _errors;
     private Dictionary<Guid, Country> _countries = null!;
-
+    private CalculateRemainDaysResponse? _calculateRemainDaysResponse;
+    
+    private MudDatePicker _pickerStart = null!;
+    private MudDatePicker _pickerEnd = null!;
+    private MudDatePicker _pickerYear = null!;
+    
     protected override async Task OnInitializedAsync()
     {
         var countries = await Context.Countries.ToListAsync();
         _countries = countries.ToDictionary(e => e.Id);
+        
+        var request = DriverUpsertRequest.Id != null ?
+            new CalculateRemainDaysRequest(DriverUpsertRequest.Id.Value, DateOnly.FromDateTime(DateTime.Today)) :
+            null;
+        
+        if(request != null)
+            _calculateRemainDaysResponse = await Mediator.Send(request);
         
         await SearchAsync();
     }
@@ -50,8 +62,8 @@ public partial class DayOfStayTable
     {
         _errors = null;
         var result = await Mediator.Send(SearchRequest);
-        result.Match(
-            list =>
+        
+        result.Match(async list =>
             {
                 _items = list;
                 ApplyDeleteItems();

@@ -28,12 +28,8 @@ public partial class DriverEditPage
         Year = DateTime.Today
     };
 
-    private CalculateRemainDaysResponse? _calculateRemainDaysResponse;
     private ICollection<string> _errors = Array.Empty<string>();
     
-    private MudDatePicker _pickerStart = null!;
-    private MudDatePicker _pickerEnd = null!;
-    private MudDatePicker _pickerYear = null!;
     private DayOfStayTable _dayOfStayTable = null!;
 
     protected override async Task OnInitializedAsync()
@@ -55,19 +51,5 @@ public partial class DriverEditPage
         }
         
         Navigation.NavigateTo("/");
-    }
-
-    private Task SearchStayOfDateAsync()
-    {
-        if (_model.Id == Guid.Empty)
-            return Task.CompletedTask;
-
-        _calculateRemainDaysResponse = null;
-        return  _dayOfStayTable.SearchAsync();
-    }
-
-    private async Task CalculateRemainDaysAsync()
-    {
-        _calculateRemainDaysResponse = await Mediator.Send(new CalculateRemainDaysRequest());
     }
 }

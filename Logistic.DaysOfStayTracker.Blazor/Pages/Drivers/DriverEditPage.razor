@@ -17,42 +17,6 @@
         <MudItem xs="6">
             <MudTextField @bind-Value="_model.LastName" For="@(() => _model.LastName)" Immediate="true" Label="Фамилия"></MudTextField>
         </MudItem>
-        <MudItem Class="pt-7" xl="12" xs="12" xxl="12">
-            <MudText Typo="Typo.h5">Дни пребывания</MudText>
-        </MudItem>
-        <MudItem xs="4">
-            <MudDatePicker @ref="_pickerStart" @bind-Date="_dayOfStaySearchRequest.Start" Label="Дата въезда" AutoClose="true">
-                <PickerActions>
-                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerStart.Clear())">Удалить</MudButton>
-                </PickerActions>
-            </MudDatePicker>
-        </MudItem>
-        <MudItem xs="4">
-            <MudDatePicker @ref="_pickerEnd" @bind-Date="_dayOfStaySearchRequest.End" Label="Дата выезда" AutoClose="true">
-                <PickerActions>
-                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerEnd.Clear())">Удалить</MudButton>
-                </PickerActions>
-            </MudDatePicker>
-        </MudItem>
-        <MudItem xs="4">
-            <MudDatePicker @ref="_pickerYear" Label="Год" @bind-Date="_dayOfStaySearchRequest.Year" OpenTo="OpenTo.Year" FixDay="1" DateFormat="yyyy" AutoClose="true">
-                <PickerActions>
-                    <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerYear.Clear())">Удалить</MudButton>
-                    <MudButton Color="Color.Primary" OnClick="@(() => _pickerYear.Close())">Сохранить</MudButton>
-                </PickerActions>
-            </MudDatePicker>
-        </MudItem>
-        <MudItem xl="12" xs="12" xxl="12">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await SearchStayOfDateAsync())">Найти</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await CalculateRemainDaysAsync())">Подсчитать дни пребывания</MudButton>
-            @if (_calculateRemainDaysResponse != null)
-            {
-                <MudItem xs="4">
-                    <MudText>В настоящее время @_calculateRemainDaysResponse.RemainDays дней.</MudText>
-                    <MudText>C @_calculateRemainDaysResponse.DateOfAddDays будет добавляться @_calculateRemainDaysResponse.AddDays дней.</MudText>
-                </MudItem>
-            }
-        </MudItem>
         <MudItem xl="12" xs="12" xxl="12">
             <DayOfStayTable @ref="_dayOfStayTable" SearchRequest="_dayOfStaySearchRequest" DriverUpsertRequest="_model"></DayOfStayTable>
         </MudItem>
