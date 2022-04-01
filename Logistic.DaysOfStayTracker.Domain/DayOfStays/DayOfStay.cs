@@ -12,10 +12,14 @@ public class DayOfStay : Entity
     public Guid DriverId { get; internal set; }
     
     public Guid EntryCountryId { get; internal set; }
-    public Country? EntryCountry { get; internal set; }
+
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
+    public Country? EntryCountry { get; private set; }
     
     public Guid ExitCountryId { get; internal set; }
-    public Country? ExitCountry { get; internal set; }
+
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
+    public Country? ExitCountry { get; private set; }
     
     internal DayOfStay(){}
 
@@ -23,9 +27,6 @@ public class DayOfStay : Entity
         Guid entryCountryId, DateOnly entryDate, 
         Guid exitCountryId, DateOnly exitDate)
     {
-        if (entryCountryId == exitCountryId)
-            return Result.Failure<DayOfStay>("Страны не могу совпадать");
-
         if (entryDate > exitDate)
             return Result.Failure<DayOfStay>("Дата въезда не может быть позже даты выезда");
 
