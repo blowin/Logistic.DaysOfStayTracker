@@ -2,3 +2,9 @@
 
 /*/bin
 /*/obj
+
+Logistic.DaysOfStayTracker.sln.DotSettings.user
+Logistic.DaysOfStayTracker.Blazor/init.sql
+Logistic.DaysOfStayTracker.Blazor/app.db
+Logistic.DaysOfStayTracker.Blazor/app.db-shm
+Logistic.DaysOfStayTracker.Blazor/app.db-wal
