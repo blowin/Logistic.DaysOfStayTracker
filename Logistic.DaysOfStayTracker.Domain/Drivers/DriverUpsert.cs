@@ -33,14 +33,17 @@ public record DriverUpsertModelGet(Guid Id) : IRequest<DriverUpsertRequest>;
 public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsertRequest>, IRequestHandler<DriverUpsertModelGet, DriverUpsertRequest>
 {
     private readonly AppDbContext _db;
-    private readonly IEnumerable<IValidator<Driver>> _validators;
+    private readonly IEnumerable<IValidator<Driver>> _driverValidators;
+    private readonly IEnumerable<IValidator<DayOfStay>> _dayOfStayValidators;
     private readonly ILogger<DriverUpsertHandler> _logger;
 
-    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> validators, ILogger<DriverUpsertHandler> logger)
+    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> driverValidators, IEnumerable<IValidator<DayOfStay>> dayOfStayValidators, 
+        ILogger<DriverUpsertHandler> logger)
     {
         _db = db;
-        _validators = validators;
+        _driverValidators = driverValidators;
         _logger = logger;
+        _dayOfStayValidators = dayOfStayValidators;
     }
 
     public async Task<Result<Unit, ICollection<string>>> Handle(DriverUpsertRequest request, CancellationToken cancellationToken)
@@ -52,7 +55,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
         driver.FirstName = request.FirstName ?? string.Empty;
         driver.LastName = request.LastName ?? string.Empty;
 
-        var result = await _validators.ValidateAsync(driver, cancellationToken);
+        var result = await _driverValidators.ValidateAsync(driver, cancellationToken);
         if (result.IsFailure)
             return result;
 
@@ -80,8 +83,20 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             }
 
             if (request.CreateDayOfStays.Count > 0)
+            {
                 await _db.DayOfStays.AddRangeAsync(request.CreateDayOfStays, cancellationToken);
-            
+
+                foreach (var createDayOfStay in request.CreateDayOfStays)
+                {
+                    var dayOfStayValidateResult = await _dayOfStayValidators.ValidateAsync(createDayOfStay, cancellationToken);
+                    if (dayOfStayValidateResult.IsSuccess)
+                        continue;
+                    
+                    await transaction.RollbackAsync(cancellationToken);
+                    return dayOfStayValidateResult;
+                }
+            }
+
             await _db.SaveChangesAsync(cancellationToken);
             
             await transaction.CommitAsync(cancellationToken);
