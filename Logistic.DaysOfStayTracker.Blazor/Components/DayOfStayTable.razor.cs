@@ -94,7 +94,7 @@ public partial class DayOfStayTable
             _countries = countries.ToDictionary(e => e.Id);
         }
         var parameters = CreateDayOfStayDialog.CreateParameters(_countries.Select(e => e.Value).ToList(), 
-            SearchRequest.DriverId ?? Guid.Empty);
+            SearchRequest.DriverId ?? Guid.Empty, Mediator);
         
         var dialog = DialogService.Show<CreateDayOfStayDialog>("Создать", parameters, op);
         var result = await dialog.Result;

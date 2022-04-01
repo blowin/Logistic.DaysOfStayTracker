@@ -12,7 +12,6 @@ public interface IValidationRequestHandler<TRequest> : IRequestHandler<TRequest,
 public interface IValidationRequestHandler<TRequest, T> : IRequestHandler<TRequest, Result<T, ICollection<string>>> 
     where TRequest : IValidationRequest<T>
 {
-    
 }
 
 public interface IValidationRequest : IValidationRequest<Unit>

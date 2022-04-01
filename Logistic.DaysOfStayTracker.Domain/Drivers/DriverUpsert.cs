@@ -2,6 +2,7 @@
 using FluentValidation;
 using Logistic.DaysOfStayTracker.Core.Common;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
+using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -50,16 +51,10 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
         
         driver.FirstName = request.FirstName ?? string.Empty;
         driver.LastName = request.LastName ?? string.Empty;
-        
-        foreach (var validator in _validators)
-        {
-            var result = await validator.ValidateAsync(driver, cancellationToken);
-            if (result.IsValid) 
-                continue;
-            
-            var errors = result.Errors.Select(e => e.ErrorMessage).ToList();
-            return Result.Failure<Unit, ICollection<string>>(errors);
-        }
+
+        var result = await _validators.ValidateAsync(driver, cancellationToken);
+        if (result.IsFailure)
+            return result;
 
         var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
         try

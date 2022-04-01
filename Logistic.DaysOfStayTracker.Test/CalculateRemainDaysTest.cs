@@ -29,20 +29,35 @@ public class CalculateRemainDaysTest
             var country1Id = db.Countries.First().Id;
             var country2Id = db.Countries.Skip(1).First().Id;
             var driver = db.Drivers.First();
-            await mediator.Send(new DriverUpsertRequest
+            
+            var upsertRequest = new DriverUpsertRequest
             {
                 Id = driver.Id,
                 FirstName = driver.FirstName,
                 LastName = driver.LastName,
-                CreateDayOfStays =
-                {
-                    DayOfStay.Create(driver.Id, country1Id, DateOnly.Parse("25.09.2021"), country2Id, DateOnly.Parse("05.10.2021")).Value,
-                    DayOfStay.Create(driver.Id, country1Id, DateOnly.Parse("22.10.2021"), country2Id, DateOnly.Parse("28.10.2021")).Value,
-                    DayOfStay.Create(driver.Id, country1Id, DateOnly.Parse("05.11.2021"), country2Id, DateOnly.Parse("12.11.2021")).Value,
-                    DayOfStay.Create(driver.Id, country1Id, DateOnly.Parse("24.12.2021"), country2Id, DateOnly.Parse("19.01.2022")).Value,
-                    DayOfStay.Create(driver.Id, country1Id, DateOnly.Parse("04.03.2022"), country2Id, DateOnly.Parse("29.03.2022")).Value,
-                }
-            });
+            };
+
+            var dayOfStayCreateRequests = new[]
+            {
+                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("25.09.2021"), country2Id,
+                    DateOnly.Parse("05.10.2021")),
+                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("22.10.2021"), country2Id,
+                    DateOnly.Parse("28.10.2021")),
+                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("05.11.2021"), country2Id,
+                    DateOnly.Parse("12.11.2021")),
+                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("24.12.2021"), country2Id,
+                    DateOnly.Parse("19.01.2022")),
+                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("04.03.2022"), country2Id,
+                    DateOnly.Parse("29.03.2022")),
+            };
+
+            foreach (var createRequest in dayOfStayCreateRequests)
+            {
+                var res = await mediator.Send(createRequest);
+                upsertRequest.CreateDayOfStays.Add(res.Value);
+            }
+            
+            await mediator.Send(upsertRequest);
 
             var result = await mediator.Send(new CalculateRemainDaysRequest( driver.Id, DateOnly.Parse("31.03.2022")));
             

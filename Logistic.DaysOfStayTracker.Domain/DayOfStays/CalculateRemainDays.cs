@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Logistic.DaysOfStayTracker.Core.Extension;
+﻿using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,35 +20,28 @@ public sealed class CalculateRemainDaysHandler
 
     public async Task<CalculateRemainDaysResponse> Handle(CalculateRemainDaysRequest request, CancellationToken cancellationToken)
     {
-        // От 90 дней начинают отниматся дни
+        const int maxInYearDays = 90;
         
-        // берем все поездки за 365 дней, (или 366) сумируем и отнимаем от 90 (90 - sum(day from 365))
-        
-        // отнимаем от сегодняшней даты 180 дней и смотрим попадает ли этот день, что водитель в это время был в европе
-        //  1. если он не был в европе, то ничего не происходит
-        //  2. если он был в европе, то 
         var yearAgo = request.Date.AddYears(-1);
         var dates = await DateRangesFromRangeAsync(yearAgo, request, cancellationToken);
         var sum = Sum(request, dates, yearAgo);
         var (additionalDate, addDays) = CalculateAdditionalDate(request, dates);
-        var response = new CalculateRemainDaysResponse((int)(90 - sum), additionalDate, addDays);
+        var response = new CalculateRemainDaysResponse((int)(maxInYearDays - sum), additionalDate, addDays);
         return response;
     }
 
     private static (DateOnly? AdditionalDate, int AdditionalDays) CalculateAdditionalDate(CalculateRemainDaysRequest request, List<DateRange> dates)
     {
-        DateOnly? additionalDate = null;
-        var addDays = 0;
+        const int checkRange = 180;
         
-        var halfOfYearAgo = request.Date.AddDays(-180);
+        var halfOfYearAgo = request.Date.AddDays(-checkRange);
         
         var halfOfYearAgoDateRange = dates.FirstOrDefault(e => e.EntryDate <= halfOfYearAgo && halfOfYearAgo <= e.ExitDate);
-        if (halfOfYearAgoDateRange != null)
-        {
-            additionalDate = halfOfYearAgoDateRange.EntryDate.Max(halfOfYearAgo).AddDays(180);
-            addDays = (int) CalculateDays(halfOfYearAgoDateRange, halfOfYearAgo, request.Date);
-        }
-
+        if (halfOfYearAgoDateRange == null) 
+            return (null, 0);
+        
+        var additionalDate = halfOfYearAgoDateRange.EntryDate.Max(halfOfYearAgo).AddDays(checkRange);
+        var addDays = (int) CalculateDays(halfOfYearAgoDateRange, halfOfYearAgo, request.Date);
         return (additionalDate, addDays);
     }
 
@@ -58,8 +50,8 @@ public sealed class CalculateRemainDaysHandler
     {
         return _db.DayOfStays
             .Where(r => r.DriverId == request.DriverId && r.EntryDate >= fromDate && r.ExitDate <= request.Date)
-            .Select(r => new DateRange(r.EntryDate, r.ExitDate))
             .OrderBy(e => e.EntryDate)
+            .Select(r => new DateRange(r.EntryDate, r.ExitDate))
             .ToListAsync(cancellationToken: cancellationToken);
     }
 
@@ -69,7 +61,7 @@ public sealed class CalculateRemainDaysHandler
             .AsEnumerable()
             .AsParallel()
             .Select(r => CalculateDays(r, yearAgo, request.Date))
-            .DefaultIfEmpty<double>(0)
+            .DefaultIfEmpty(0)
             .Sum();
     }
 

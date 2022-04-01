@@ -1,5 +1,4 @@
-﻿using CSharpFunctionalExtensions;
-using Logistic.DaysOfStayTracker.Core.Countries;
+﻿using Logistic.DaysOfStayTracker.Core.Countries;
 using Entity = Logistic.DaysOfStayTracker.Core.Common.Entity;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
@@ -22,23 +21,4 @@ public class DayOfStay : Entity
     public Country? ExitCountry { get; private set; }
     
     internal DayOfStay(){}
-
-    public static Result<DayOfStay> Create(Guid driverId, 
-        Guid entryCountryId, DateOnly entryDate, 
-        Guid exitCountryId, DateOnly exitDate)
-    {
-        if (entryDate > exitDate)
-            return Result.Failure<DayOfStay>("Дата въезда не может быть позже даты выезда");
-
-        return Result.Success(new DayOfStay
-        {
-            DriverId = driverId,
-
-            EntryCountryId = entryCountryId,
-            EntryDate = entryDate,
-
-            ExitCountryId = exitCountryId,
-            ExitDate = exitDate
-        });
-    }
 }

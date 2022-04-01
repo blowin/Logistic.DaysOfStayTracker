@@ -1,12 +1,14 @@
 ﻿@using Logistic.DaysOfStayTracker.Core.Countries
 @using Logistic.DaysOfStayTracker.Core.DayOfStays
+@using MediatR
 
 <MudDialog>
     <DialogContent>
-        @if (!string.IsNullOrEmpty(_errorMessage))
+        @foreach (var error in _errorMessage)
         {
-            <MudText Color="Color.Error">@_errorMessage</MudText>
+            <MudText Color="Color.Error">@error</MudText>
         }
+        
         <MudSelect @bind-Value="@_entryCountry" T="Country" Label="Страна въезда" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Required="true">
             @foreach (var country in Countries)
             {
@@ -25,11 +27,11 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Отмена</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">Добавить</MudButton>
+        <MudButton Color="Color.Primary" OnClick="@(async () => await Submit())">Добавить</MudButton>
     </DialogActions>
 </MudDialog>
 @code {
-    private string _errorMessage = string.Empty;
+    private ICollection<string> _errorMessage = Array.Empty<string>();
 
     private Country _entryCountry = null!;
     private DateTime? _exitDate = DateTime.Now;
@@ -43,6 +45,9 @@
     [Parameter]
     public Guid DriverId { get; set; }
 
+    [Parameter]
+    public IMediator Mediator { get; set; } = null!;
+
     [CascadingParameter]
     public MudDialogInstance MudDialog { get; set; } = null!;
 
@@ -52,24 +57,28 @@
         _exitCountry = Countries.First();
     }
 
-    void Submit()
+    async Task Submit()
     {
-        _errorMessage = string.Empty;
+        _errorMessage = Array.Empty<string>();
         if (_entryDate == null)
         {
-            _errorMessage = "Необходимо указать дату въезда";
+            _errorMessage = new []{"Необходимо указать дату въезда"};
             return;
         }
 
         if (_exitDate == null)
         {
-            _errorMessage = "Необходимо указать дату выезда";
+            _errorMessage = new []{ "Необходимо указать дату выезда" };
             return;
         }
 
-        var entryDate = DateOnly.FromDateTime(_entryDate.Value.ToLocalTime());
-        var exitDate = DateOnly.FromDateTime(_exitDate.Value.ToLocalTime());
-        var createResult = DayOfStay.Create(DriverId, _entryCountry.Id, entryDate, _exitCountry.Id, exitDate);
+        var request = new DayOfStayCreateRequest(DriverId,
+            _entryCountry.Id, DateOnly.FromDateTime(_entryDate.Value.ToLocalTime()),
+            _exitCountry.Id, DateOnly.FromDateTime(_exitDate.Value.ToLocalTime())
+            );
+        
+        var createResult = await Mediator.Send(request);
+        
         if (createResult.IsFailure)
         {
             _errorMessage = createResult.Error;
@@ -87,12 +96,13 @@
         MudDialog.Close(dialogResult);
     }
     
-    public static DialogParameters CreateParameters(IReadOnlyList<Country> countries, Guid driverId)
+    public static DialogParameters CreateParameters(IReadOnlyList<Country> countries, Guid driverId, IMediator mediator)
     {
         var parameters = new DialogParameters
         {
             {nameof(Countries), countries},
             {nameof(DriverId), driverId},
+            {nameof(Mediator), mediator},
         };
         return parameters;
     }

@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using FluentValidation;
 using Logistic.DaysOfStayTracker.Core.Common;
+using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,15 +33,9 @@ public sealed class CountryUpsertHandler : IValidationRequestHandler<CountryUpse
             : new Country();
         
         country.Name = request.Name ?? string.Empty;
-        foreach (var validator in _validators)
-        {
-            var result = await validator.ValidateAsync(country, cancellationToken);
-            if (result.IsValid) 
-                continue;
-            
-            var errors = result.Errors.Select(e => e.ErrorMessage).ToList();
-            return Result.Failure<Unit, ICollection<string>>(errors);
-        }
+        var result = await _validators.ValidateAsync(country, cancellationToken);
+        if (result.IsFailure)
+            return result;
         
         if (request.Id == null)
         {
