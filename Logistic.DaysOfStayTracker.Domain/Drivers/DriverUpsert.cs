@@ -64,6 +64,18 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
         var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
         try
         {
+            if (request.Id == null)
+            {
+                await _db.Drivers.AddAsync(driver, cancellationToken);
+                request.Id = driver.Id;
+                foreach (var requestCreateDayOfStay in request.CreateDayOfStays)
+                    requestCreateDayOfStay.DriverId = driver.Id;
+            }
+            else
+            {
+                _db.Drivers.Update(driver);   
+            }
+            
             if (request.DeletedDayOfStays.Count > 0)
             {
                 var removeDayOfStays = _db.DayOfStays.AsTracking()
@@ -74,16 +86,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
 
             if (request.CreateDayOfStays.Count > 0)
                 await _db.DayOfStays.AddRangeAsync(request.CreateDayOfStays, cancellationToken);
-
-            if (request.Id == null)
-            {
-                await _db.Drivers.AddAsync(driver, cancellationToken);
-            }
-            else
-            {
-                _db.Drivers.Update(driver);   
-            }
-        
+            
             await _db.SaveChangesAsync(cancellationToken);
             
             await transaction.CommitAsync(cancellationToken);

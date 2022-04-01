@@ -13,7 +13,7 @@
                 <MudSelectItem Value="@country">@country.Name</MudSelectItem>
             }
         </MudSelect>
-        <MudDatePicker @bind-Date="@_entryDate" Label="Дата въезда" Required="true"></MudDatePicker>
+        <MudDatePicker @bind-Date="@_entryDate" Editable="true" Label="Дата въезда" Required="true"></MudDatePicker>
 
         <MudSelect Class="pt-5" @bind-Value="@_exitCountry" T="Country" Label="Страна выезда" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Required="true">
             @foreach (var country in Countries)
@@ -21,7 +21,7 @@
                 <MudSelectItem Value="@country">@country.Name</MudSelectItem>
             }
         </MudSelect>
-        <MudDatePicker @bind-Date="@_exitDate" Label="Дата выезда" Required="true"></MudDatePicker>
+        <MudDatePicker @bind-Date="@_exitDate" Editable="true" Label="Дата выезда" Required="true"></MudDatePicker>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Отмена</MudButton>

@@ -16,21 +16,21 @@
         </MudItem>
     }
     <MudItem xs="4">
-        <MudDatePicker @ref="_pickerStart" @bind-Date="SearchRequest.Start" Label="Дата въезда" AutoClose="true">
+        <MudDatePicker @ref="_pickerStart" @bind-Date="SearchRequest.Start" Editable="true" Label="Дата въезда" AutoClose="true">
             <PickerActions>
                 <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerStart.Clear())">Удалить</MudButton>
             </PickerActions>
         </MudDatePicker>
     </MudItem>
     <MudItem xs="4">
-        <MudDatePicker @ref="_pickerEnd" @bind-Date="SearchRequest.End" Label="Дата выезда" AutoClose="true">
+        <MudDatePicker @ref="_pickerEnd" @bind-Date="SearchRequest.End" Editable="true" Label="Дата выезда" AutoClose="true">
             <PickerActions>
                 <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerEnd.Clear())">Удалить</MudButton>
             </PickerActions>
         </MudDatePicker>
     </MudItem>
     <MudItem xs="4">
-        <MudDatePicker @ref="_pickerYear" Label="Год" @bind-Date="SearchRequest.Year" OpenTo="OpenTo.Year" FixDay="1" DateFormat="yyyy" AutoClose="true">
+        <MudDatePicker @ref="_pickerYear" Label="Год" @bind-Date="SearchRequest.Year" Editable="true" OpenTo="OpenTo.Year" FixDay="1" DateFormat="yyyy" AutoClose="true">
             <PickerActions>
                 <MudButton Class="mr-auto align-self-start" OnClick="@(() => _pickerYear.Clear())">Удалить</MudButton>
                 <MudButton Color="Color.Primary" OnClick="@(() => _pickerYear.Close())">Сохранить</MudButton>
