@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
@@ -15,57 +16,57 @@ namespace Logistic.DaysOfStayTracker.Test;
 
 public class CalculateRemainDaysTest
 {
-    [Fact]
-    public async Task Test()
+    public static IEnumerable<object[]> MemberData
     {
-        var provider = await CreateWithDriver();
-        using (var scope = provider.CreateScope())
+        get
         {
-            var sp = scope.ServiceProvider;
-            
-            var mediator = sp.GetRequiredService<IMediator>();
-
-            var db = sp.GetRequiredService<AppDbContext>();
-            var country1Id = db.Countries.First().Id;
-            var country2Id = db.Countries.Skip(1).First().Id;
-            var driver = db.Drivers.First();
-            
-            var upsertRequest = new DriverUpsertRequest
+            yield return new object[]
             {
-                Id = driver.Id,
-                FirstName = driver.FirstName,
-                LastName = driver.LastName,
+                new CalculateRemainDaysResponse(11, DateOnly.Parse("31.03.2022"), 4),
+                DateOnly.Parse("31.03.2022"),
+                new []
+                {
+                    (DateOnly.Parse("25.09.2021"), DateOnly.Parse("05.10.2021")),
+                    (DateOnly.Parse("22.10.2021"), DateOnly.Parse("28.10.2021")),
+                    (DateOnly.Parse("05.11.2021"), DateOnly.Parse("12.11.2021")),
+                    (DateOnly.Parse("24.12.2021"), DateOnly.Parse("19.01.2022")),
+                    (DateOnly.Parse("04.03.2022"), DateOnly.Parse("29.03.2022")),
+                }
             };
-
-            var dayOfStayCreateRequests = new[]
-            {
-                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("25.09.2021"), country2Id,
-                    DateOnly.Parse("05.10.2021")),
-                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("22.10.2021"), country2Id,
-                    DateOnly.Parse("28.10.2021")),
-                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("05.11.2021"), country2Id,
-                    DateOnly.Parse("12.11.2021")),
-                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("24.12.2021"), country2Id,
-                    DateOnly.Parse("19.01.2022")),
-                new DayOfStayCreateRequest(driver.Id, country1Id, DateOnly.Parse("04.03.2022"), country2Id,
-                    DateOnly.Parse("29.03.2022")),
-            };
-
-            foreach (var createRequest in dayOfStayCreateRequests)
-            {
-                var res = await mediator.Send(createRequest);
-                upsertRequest.CreateDayOfStays.Add(res.Value);
-            }
-            
-            await mediator.Send(upsertRequest);
-
-            var result = await mediator.Send(new CalculateRemainDaysRequest( driver.Id, DateOnly.Parse("31.03.2022")));
-            
-            Assert.Equal(new CalculateRemainDaysResponse(11, DateOnly.Parse("31.03.2022"), 4), result);
         }
     }
 
-    private async Task<IServiceProvider> CreateWithDriver()
+    [Theory]
+    [MemberData(nameof(MemberData))]
+    public async Task CalculateRemainDaysHandlerTest(CalculateRemainDaysResponse expectedResponse, DateOnly requestDate,
+        (DateOnly from, DateOnly to)[] dates)
+    {
+        var provider = await CreateWithDriver();
+        using var scope = provider.CreateScope();
+        var sp = scope.ServiceProvider;
+            
+        var mediator = sp.GetRequiredService<IMediator>();
+
+        var db = sp.GetRequiredService<AppDbContext>();
+        var countryId = db.Countries.First().Id;
+        var driver = db.Drivers.First();
+            
+        var upsertRequest = new DriverUpsertRequest { Id = driver.Id };
+
+        foreach (var (from, to) in dates)
+        {
+            var createRequest = new DayOfStayCreateRequest(driver.Id, countryId, from, countryId, to);
+            var res = await mediator.Send(createRequest);
+            upsertRequest.CreateDayOfStays.Add(res.Value);
+        }
+            
+        await mediator.Send(upsertRequest);
+
+        var result = await mediator.Send(new CalculateRemainDaysRequest(driver.Id, requestDate));
+        Assert.Equal(expectedResponse, result);
+    }
+
+    private static async Task<IServiceProvider> CreateWithDriver()
     {
         var dbName = Guid.NewGuid().ToString("N");
         var collection = new ServiceCollection()

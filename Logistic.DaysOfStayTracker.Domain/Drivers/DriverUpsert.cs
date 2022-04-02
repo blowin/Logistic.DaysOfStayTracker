@@ -52,8 +52,11 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             ? await _db.Drivers.AsTracking().FirstAsync(e => e.Id == request.Id, cancellationToken)
             : new Driver();
         
-        driver.FirstName = request.FirstName ?? string.Empty;
-        driver.LastName = request.LastName ?? string.Empty;
+        if(!string.IsNullOrEmpty(request.FirstName))
+            driver.FirstName = request.FirstName;
+        
+        if(!string.IsNullOrEmpty(request.LastName))
+            driver.LastName = request.LastName;
 
         var result = await _driverValidators.ValidateAsync(driver, cancellationToken);
         if (result.IsFailure)
