@@ -21,57 +21,73 @@ public sealed class CalculateRemainDaysHandler
     public async Task<CalculateRemainDaysResponse> Handle(CalculateRemainDaysRequest request, CancellationToken cancellationToken)
     {
         const int maxInYearDays = 90;
+        var ago180 = request.Date.AddDays(-180);
+        var dates = await DateRangesFromRangeAsync(ago180, request, cancellationToken);
         
-        var yearAgo = request.Date.AddYears(-1);
-        var dates = await DateRangesFromRangeAsync(yearAgo, request, cancellationToken);
-        var sum = Sum(request, dates, yearAgo);
-        var (additionalDate, addDays) = CalculateAdditionalDate(request, dates);
-        var response = new CalculateRemainDaysResponse((int)(maxInYearDays - sum), additionalDate, addDays);
+        var remainDay = maxInYearDays - Sum(request, dates, ago180);
+        
+        var (additionalDate, addDays, beenInEurope) = CalculateAdditionalDate(request, dates);
+        if (beenInEurope)
+            remainDay += 1;
+        
+        var response = new CalculateRemainDaysResponse((int)remainDay, additionalDate, addDays);
         return response;
     }
 
-    private static (DateOnly? AdditionalDate, int AdditionalDays) CalculateAdditionalDate(CalculateRemainDaysRequest request, List<DateRange> dates)
+    private static (DateOnly? AdditionalDate, int AdditionalDays, bool BeenInEurope) CalculateAdditionalDate(CalculateRemainDaysRequest request, List<DateRange> dates)
     {
         const int checkRange = 180;
         
         var halfOfYearAgo = request.Date.AddDays(-checkRange);
         
-        var halfOfYearAgoDateRange = dates.FirstOrDefault(e => e.EntryDate <= halfOfYearAgo && halfOfYearAgo <= e.ExitDate);
-        if (halfOfYearAgoDateRange == null) 
-            return (null, 0);
+        var additionalRange = dates.FirstOrDefault(e => e.EntryDate <= halfOfYearAgo && halfOfYearAgo <= e.ExitDate);
+        if (additionalRange != null)
+        {
+            additionalRange = additionalRange with {EntryDate = additionalRange.EntryDate.Max(halfOfYearAgo)};
+            var additionalDate = additionalRange.EntryDate.AddDays(checkRange);
+            return (additionalDate, additionalRange.TotalDays - 1, true);   
+        }
+
+        var firstAdditionalRange = dates.FirstOrDefault(e => e.EntryDate > halfOfYearAgo);
+        if (firstAdditionalRange != null)
+        {
+            var additionalDate = firstAdditionalRange.EntryDate.AddDays(checkRange);
+            return (additionalDate, firstAdditionalRange.TotalDays, false);
+        }
         
-        var additionalDate = halfOfYearAgoDateRange.EntryDate.Max(halfOfYearAgo).AddDays(checkRange);
-        var addDays = (int) CalculateDays(halfOfYearAgoDateRange, halfOfYearAgo, request.Date);
-        return (additionalDate, addDays);
+        return (null, 0, false);
     }
 
     private Task<List<DateRange>> DateRangesFromRangeAsync(DateOnly fromDate, CalculateRemainDaysRequest request, 
         CancellationToken cancellationToken)
     {
-        return _db.DayOfStays
-            .Where(r => r.DriverId == request.DriverId && r.EntryDate >= fromDate && r.ExitDate <= request.Date)
+        return _db.DayOfStays.Where(r => r.DriverId == request.DriverId)
+            .Where(r => (r.EntryDate <= request.Date && fromDate <= r.ExitDate))
             .OrderBy(e => e.EntryDate)
             .Select(r => new DateRange(r.EntryDate, r.ExitDate))
             .ToListAsync(cancellationToken: cancellationToken);
     }
 
-    private static double Sum(CalculateRemainDaysRequest request, List<DateRange> dates, DateOnly yearAgo)
+    private static double Sum(CalculateRemainDaysRequest request, List<DateRange> dates, DateOnly fromDate)
     {
+        var dd = dates.Select(e => e.TotalDays).ToList();
         return dates
             .AsEnumerable()
             .AsParallel()
-            .Select(r => CalculateDays(r, yearAgo, request.Date))
+            .Select(r => r.TotalDays)
             .DefaultIfEmpty(0)
             .Sum();
     }
 
-    private static double CalculateDays(DateRange range, DateOnly minDateTime, DateOnly maxDateTime)
+    private record DateRange(DateOnly EntryDate, DateOnly ExitDate)
     {
-        var exitDate = range.ExitDate.Min(maxDateTime);
-        var entryDate = range.EntryDate.Max(minDateTime);
-        var totalDays = exitDate.Subtract(entryDate).TotalDays;
-        return totalDays + 1;
+        public int TotalDays
+        {
+            get
+            {
+                var totalDays = ExitDate.Subtract(EntryDate).TotalDays;
+                return (int)totalDays + 1;
+            }
+        }
     }
-    
-    private record DateRange(DateOnly EntryDate, DateOnly ExitDate);
 }
