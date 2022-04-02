@@ -1,4 +1,7 @@
-@* ReSharper disable once ConditionIsAlwaysTrueOrFalse *@
+@foreach (var error in _errors)
+{
+    <MudText Color="Color.Error">@error</MudText>
+}
 <MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
     <HeaderContent>
         <MudTh>Имя</MudTh>

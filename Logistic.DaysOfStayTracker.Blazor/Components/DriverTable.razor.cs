@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
@@ -17,14 +18,12 @@ public partial class DriverTable
     [Inject]
     private NavigationManager NavigationManager { get; set; } = null!;
     
-    [Inject]
-    private AppDbContext AppContext { get; set; } = null!;
-
     [Parameter]
     public DriverSearchRequest SearchRequest { get; set; } = new();
     
     private IPagedList<Driver> _items = Constants.CreateEmptyPagedList<Driver>();
-    
+    private ICollection<string> _errors = Array.Empty<string>();
+
     protected override Task OnInitializedAsync()
     {
         return SearchAsync();
@@ -38,6 +37,7 @@ public partial class DriverTable
 
     public async Task SearchAsync()
     {
+        _errors = Array.Empty<string>();
         _items = await Mediator.Send(SearchRequest);
     }
 
@@ -45,13 +45,13 @@ public partial class DriverTable
 
     private async Task Delete(Guid driverId)
     {
-        // TODO вынести в Mediatr + удалять все связанные сущности
-        var entity = await AppContext.Drivers.FindAsync(driverId);
-        if(entity == null)
+        var result = await Mediator.Send(new DriverDeleteRequest(driverId));
+        if (result.IsFailure)
+        {
+            _errors = result.Error;
             return;
-        
-        AppContext.Drivers.Remove(entity);
-        await AppContext.SaveChangesAsync();
+        }
+
         await SearchAsync();
     }
 }
