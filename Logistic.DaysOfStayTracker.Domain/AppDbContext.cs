@@ -7,37 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Logistic.DaysOfStayTracker.Core;
 
-public class Repository<T> 
-    where T : Entity
-{
-    private readonly AppDbContext _db;
-    private readonly DbSet<T> _set;
-
-    public Repository(AppDbContext db)
-    {
-        _db = db;
-        _set = db.Set<T>();
-    }
-
-    public async Task AddAsync(T entity)
-    {
-        await _set.AddAsync(entity);
-        await _db.SaveChangesAsync();
-    }
-
-    public Task DeleteAsync(T entity)
-    {
-        _set.Remove(entity);
-        return _db.SaveChangesAsync();
-    }
-
-    public Task UpdateAsync(T entity)
-    {
-        _set.Update(entity);
-        return _db.SaveChangesAsync();
-    }
-}
-
 public sealed class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options)

@@ -6,7 +6,9 @@ using CSharpFunctionalExtensions;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Countries;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
+using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 using Logistic.DaysOfStayTracker.Core.Drivers;
+using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -63,7 +65,7 @@ public partial class DayOfStayTable
         _errors = null;
         var result = await Mediator.Send(SearchRequest);
         
-        result.Match(async list =>
+        result.Match(list =>
             {
                 _items = list;
                 ApplyDeleteItems();

@@ -3,7 +3,7 @@ using FluentValidation;
 using Logistic.DaysOfStayTracker.Core.Common;
 using Logistic.DaysOfStayTracker.Core.Extension;
 
-namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
+namespace Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 
 public record DayOfStayCreateRequest(Guid DriverId,
     Guid EntryCountryId, DateOnly EntryDate,

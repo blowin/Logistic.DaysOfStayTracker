@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
+using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 using Logistic.DaysOfStayTracker.Core.Drivers;
+using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using Logistic.DaysOfStayTracker.DependencyInjection;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -103,12 +105,14 @@ public class CalculateRemainDaysTest
     private static async Task<IServiceProvider> CreateWithDriver()
     {
         var dbName = Guid.NewGuid().ToString("N");
+        var appConfig = new AppServicesConfiguration(builder =>
+        {
+            builder.UseInMemoryDatabase(dbName)
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+        });
+        
         var collection = new ServiceCollection()
-            .AddAppServices(builder =>
-            {
-                builder.UseInMemoryDatabase(dbName)
-                    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            })
+            .AddAppServices(appConfig)
             .BuildServiceProvider();
 
         using var scope = collection.CreateScope();

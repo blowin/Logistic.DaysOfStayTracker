@@ -2,7 +2,7 @@
 using MediatR;
 using X.PagedList;
 
-namespace Logistic.DaysOfStayTracker.Core.Countries;
+namespace Logistic.DaysOfStayTracker.Core.Countries.Commands;
 
 public record CountrySearchRequest : IRequest<IPagedList<Country>>
 {

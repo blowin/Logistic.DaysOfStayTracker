@@ -18,6 +18,7 @@ namespace Logistic.DaysOfStayTracker.Blazor
             Configuration = configuration;
         }
 
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -28,11 +29,12 @@ namespace Logistic.DaysOfStayTracker.Blazor
             services.AddServerSideBlazor();
             services.AddMudServices();
 
-            services.AddAppServices(builder =>
+            var appServicesConfig = new AppServicesConfiguration(builder =>
             {
                 //builder.UseInMemoryDatabase("db").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 builder.UseSqlite("Data Source=app.db");
             });
+            services.AddAppServices(appServicesConfig);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

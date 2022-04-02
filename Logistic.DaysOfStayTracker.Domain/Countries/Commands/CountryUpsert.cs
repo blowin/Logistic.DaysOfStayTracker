@@ -5,7 +5,7 @@ using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Logistic.DaysOfStayTracker.Core.Countries;
+namespace Logistic.DaysOfStayTracker.Core.Countries.Commands;
 
 public class CountryUpsertRequest : IValidationRequest
 {

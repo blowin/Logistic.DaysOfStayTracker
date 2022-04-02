@@ -2,7 +2,7 @@
 using MediatR;
 using X.PagedList;
 
-namespace Logistic.DaysOfStayTracker.Core.Drivers;
+namespace Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 
 public class DriverSearchRequest : IRequest<IPagedList<Driver>>
 {

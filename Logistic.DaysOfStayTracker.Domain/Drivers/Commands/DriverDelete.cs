@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Logistic.DaysOfStayTracker.Core.Drivers;
+namespace Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 
 public record DriverDeleteRequest(Guid Id) : IValidationRequest<Unit>;
 

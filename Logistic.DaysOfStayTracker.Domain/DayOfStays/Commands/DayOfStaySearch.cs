@@ -2,7 +2,7 @@
 using Logistic.DaysOfStayTracker.Core.Common;
 using Microsoft.EntityFrameworkCore;
 
-namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
+namespace Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 
 public record DayOfStaySearchRequest : IValidationRequest<List<DayOfStay>>
 {

@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Logistic.DaysOfStayTracker.Core.DayOfStays;
+namespace Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 
 public record CalculateRemainDaysRequest(Guid DriverId, DateOnly Date) : IRequest<CalculateRemainDaysResponse>;
 

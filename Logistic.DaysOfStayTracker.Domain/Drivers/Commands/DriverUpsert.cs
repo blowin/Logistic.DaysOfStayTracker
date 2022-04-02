@@ -7,7 +7,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Logistic.DaysOfStayTracker.Core.Drivers;
+namespace Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 
 public class DriverUpsertRequest : IValidationRequest
 {
