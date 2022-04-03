@@ -42,7 +42,11 @@
         @if (_calculateRemainDaysResponse != null)
         {
             <MudItem xs="4">
-                <MudText>В настоящее время @_calculateRemainDaysResponse.RemainDays дней.</MudText>
+                @if (DriverUpsertRequest.HasDeleteOrCreateDateOfStays)
+                {
+                    <MudText Color="Color.Warning">Внимание! Были изменения в датах, для корретного подсчёта, сохраните данные и откройте запись повторно.</MudText>
+                }
+                <MudText>На данный момент осталось @_calculateRemainDaysResponse.RemainDays дней.</MudText>
                 <MudText>C @_calculateRemainDaysResponse.DateOfAddDays будет добавляться @_calculateRemainDaysResponse.AddDays дней.</MudText>
             </MudItem>
         }

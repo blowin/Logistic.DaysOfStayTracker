@@ -1,0 +1,29 @@
+﻿<MudDialog>
+    <DialogContent>
+        @Message
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Нет</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Да</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    public const string DeleteMessage = "Вы уверены, что хотите удалить запись?";
+
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+    
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+
+    void Submit() => MudDialog.Close(DialogResult.Ok(DBNull.Value));
+    void Cancel() => MudDialog.Cancel();
+    
+    public static DialogParameters CreateParameters(string message)
+    {
+        var parameters = new DialogParameters
+        {
+            {nameof(Message), message},
+        };
+        return parameters;
+    }
+}

@@ -19,6 +19,8 @@ public class DriverUpsertRequest : IValidationRequest
 
     public HashSet<DayOfStay> CreateDayOfStays { get; } = new();
 
+    public bool HasDeleteOrCreateDateOfStays => DeletedDayOfStays.Count > 0 || CreateDayOfStays.Count > 0;
+    
     public void AddDeletedDayOfStay(DayOfStay dayOfStay)
     {
         if(CreateDayOfStays.Remove(dayOfStay))

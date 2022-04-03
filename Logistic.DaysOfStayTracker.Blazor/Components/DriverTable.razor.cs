@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Logistic.DaysOfStayTracker.Blazor.Extension;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using X.PagedList;
 
 namespace Logistic.DaysOfStayTracker.Blazor.Components;
@@ -18,6 +20,9 @@ public partial class DriverTable
     
     [Inject]
     private NavigationManager NavigationManager { get; set; } = null!;
+    
+    [Inject]
+    public IDialogService DialogService { get; set; } = null!;
     
     [Parameter]
     public DriverSearchRequest SearchRequest { get; set; } = new();
@@ -46,6 +51,10 @@ public partial class DriverTable
 
     private async Task Delete(Guid driverId)
     {
+        var ok = await DialogService.ShowConfirmDialog(ConfirmDialog.DeleteMessage);
+        if(!ok)
+            return;
+        
         var result = await Mediator.Send(new DriverDeleteRequest(driverId));
         if (result.IsFailure)
         {
