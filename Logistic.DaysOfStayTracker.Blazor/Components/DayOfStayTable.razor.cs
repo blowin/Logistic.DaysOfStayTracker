@@ -89,12 +89,6 @@ public partial class DayOfStayTable
     private async Task AddDayOfStay()
     {
         var op = new DialogOptions{ FullWidth = true };
-
-        if (_countries.Count == 0)
-        {
-            var countries = await Context.Countries.ToListAsync();
-            _countries = countries.ToDictionary(e => e.Id);
-        }
         var parameters = CreateDayOfStayDialog.CreateParameters(_countries.Select(e => e.Value).ToList(), 
             SearchRequest.DriverId ?? Guid.Empty, Mediator);
         

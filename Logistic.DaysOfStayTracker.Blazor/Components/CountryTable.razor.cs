@@ -18,7 +18,7 @@ public partial class CountryTable
     public IMediator Mediator { get; set; } = null!;
 
     [Inject]
-    public AppDbContext AppContext { get; set; } = null!;
+    public Repository<Country> Repository { get; set; } = null!;
     
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
@@ -51,13 +51,8 @@ public partial class CountryTable
         var ok = await DialogService.ShowConfirmDialog(ConfirmDialog.DeleteMessage);
         if(!ok)
             return;
-        
-        var entity = await AppContext.Countries.FindAsync(countryId);
-        if(entity == null)
-            return;
-        
-        AppContext.Countries.Remove(entity);
-        await AppContext.SaveChangesAsync();
+
+        await Repository.DeleteAsync(countryId);
         await SearchAsync();
     }
 }

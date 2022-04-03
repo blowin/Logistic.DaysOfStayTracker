@@ -26,7 +26,8 @@ public static class DependencyInjectionExt
         self
             .AddDbContextPool<AppDbContext>(configuration.DbConfiguration)
             .AddValidatorsFromAssembly(typeof(DayOfStaySearchRequest).Assembly)
-            .AddMediatR(typeof(DayOfStaySearchRequest).Assembly);
+            .AddMediatR(typeof(DayOfStaySearchRequest).Assembly)
+            .AddScoped(typeof(Repository<>));
 
         if (configuration.LoggingConfiguration == null)
         {

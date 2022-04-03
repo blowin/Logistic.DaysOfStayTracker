@@ -1,5 +1,4 @@
 ﻿using Bogus;
-using Logistic.DaysOfStayTracker.Core.Common;
 using Logistic.DaysOfStayTracker.Core.Countries;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Drivers;
