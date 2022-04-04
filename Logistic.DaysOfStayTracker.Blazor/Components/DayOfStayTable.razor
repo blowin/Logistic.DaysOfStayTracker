@@ -4,7 +4,7 @@
 
 <MudGrid>
     <MudItem Class="pt-5" xs="12">
-        <MudText Typo="Typo.h5">Дни пребывания</MudText>
+        <MudText Typo="Typo.h5" Inline="true">Дни пребывания</MudText>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddDayOfStay">+</MudButton>
     </MudItem>
     @if (_errors != null)
@@ -42,13 +42,14 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await SearchAsync())">Найти</MudButton>
         @if (_calculateRemainDaysResponse != null)
         {
-            <MudItem xs="4">
+            <MudItem Class="pt-4" xs="4">
                 @if (DriverUpsertRequest.HasDeleteOrCreateDateOfStays)
                 {
-                    <MudText Color="Color.Warning">Внимание! Были изменения в датах, для корретного подсчёта, сохраните данные и откройте запись повторно.</MudText>
+                    <MudText Align="Align.Center" Color="Color.Warning">Внимание! Были изменения в датах, для корретного подсчёта, сохраните данные и откройте запись повторно.</MudText>
                 }
-                <MudText>На данный момент осталось @_calculateRemainDaysResponse.RemainDays дней.</MudText>
-                <MudText>C @_calculateRemainDaysResponse.DateOfAddDays будет добавляться @_calculateRemainDaysResponse.AddDays дней.</MudText>
+                <CalculateRemainDaysComponent RemainDays="@_calculateRemainDaysResponse.RemainDays"
+                                              DateOfAddDays="@_calculateRemainDaysResponse.DateOfAddDays"
+                                              AddDays="@_calculateRemainDaysResponse.AddDays"/>
             </MudItem>
         }
     </MudItem>

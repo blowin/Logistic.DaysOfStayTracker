@@ -1,0 +1,17 @@
+﻿<MudCard>
+    <MudCardContent>
+        <MudText Align="Align.Center">На данный момент осталось @RemainDays дней.</MudText>
+        <MudText Align="Align.Center" Typo="Typo.body2">C @DateOfAddDays будет добавляться @AddDays дней.</MudText>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public int RemainDays { get; set; }
+    
+    [Parameter]
+    public DateOnly? DateOfAddDays { get; set; }
+    
+    [Parameter]
+    public int AddDays { get; set; }
+}
