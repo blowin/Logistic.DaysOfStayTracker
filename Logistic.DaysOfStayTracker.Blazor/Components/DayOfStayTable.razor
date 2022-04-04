@@ -1,5 +1,6 @@
 ﻿@using Microsoft.VisualBasic
 @using Constants = Logistic.DaysOfStayTracker.Core.Constants
+@using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands
 
 <MudGrid>
     <MudItem Class="pt-5" xs="12">
@@ -59,6 +60,7 @@
                 <MudTh>Страна въезда</MudTh>
                 <MudTh>Дата выезда</MudTh>
                 <MudTh>Страна выезда</MudTh>
+                <MudTh>Количество дней</MudTh>
                 <MudTh>Действия</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -66,6 +68,7 @@
                 <MudTd DataLabel="Страна въезда">@(_countries[context.EntryCountryId].Name)</MudTd>
                 <MudTd DataLabel="Дата выезда">@context.ExitDate</MudTd>
                 <MudTd DataLabel="Страна выезда">@(_countries[context.ExitCountryId].Name)</MudTd>
+                <MudTd DataLabel="Количество дней">@((new DateRangeValueType(context.EntryDate, context.ExitDate)).TotalDays)</MudTd>
                 <MudTd>
                     <MudButton Color="Color.Primary" OnClick="@(() => Delete(context))">Удалить</MudButton>
                 </MudTd>

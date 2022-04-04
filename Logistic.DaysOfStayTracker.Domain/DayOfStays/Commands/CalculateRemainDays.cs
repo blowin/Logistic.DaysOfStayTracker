@@ -24,7 +24,7 @@ public sealed class CalculateRemainDaysHandler
         var ago180 = request.Date.AddDays(-180);
         var dates = await DateRangesFromRangeAsync(ago180, request, cancellationToken);
         
-        var remainDay = maxInYearDays - Sum(request, dates, ago180);
+        var remainDay = maxInYearDays - Sum(dates);
         
         var (additionalDate, addDays, beenInEurope) = CalculateAdditionalDate(request, dates);
         if (beenInEurope)
@@ -68,9 +68,8 @@ public sealed class CalculateRemainDaysHandler
             .ToListAsync(cancellationToken: cancellationToken);
     }
 
-    private static double Sum(CalculateRemainDaysRequest request, List<DateRange> dates, DateOnly fromDate)
+    private static double Sum(List<DateRange> dates)
     {
-        var dd = dates.Select(e => e.TotalDays).ToList();
         return dates
             .AsEnumerable()
             .AsParallel()
@@ -78,16 +77,30 @@ public sealed class CalculateRemainDaysHandler
             .DefaultIfEmpty(0)
             .Sum();
     }
+}
 
-    private record DateRange(DateOnly EntryDate, DateOnly ExitDate)
+public record DateRange(DateOnly EntryDate, DateOnly ExitDate)
+{
+    public int TotalDays => new DateRangeValueType(EntryDate, ExitDate).TotalDays;
+}
+
+public readonly ref struct DateRangeValueType
+{
+    public readonly DateOnly EntryDate;
+    public readonly DateOnly ExitDate;
+
+    public DateRangeValueType(DateOnly entryDate, DateOnly exitDate)
     {
-        public int TotalDays
+        EntryDate = entryDate;
+        ExitDate = exitDate;
+    }
+    
+    public int TotalDays
+    {
+        get
         {
-            get
-            {
-                var totalDays = ExitDate.Subtract(EntryDate).TotalDays;
-                return (int)totalDays + 1;
-            }
+            var totalDays = ExitDate.Subtract(EntryDate).TotalDays;
+            return (int)totalDays + 1;
         }
     }
 }
