@@ -54,4 +54,9 @@ public partial class DriverEditPage
         
         Navigation.NavigateTo("/");
     }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
 }

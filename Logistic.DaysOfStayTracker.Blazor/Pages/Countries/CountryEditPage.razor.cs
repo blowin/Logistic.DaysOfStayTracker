@@ -43,4 +43,9 @@ public partial class CountryEditPage
         
         Navigation.NavigateTo("/countries");
     }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/countries");
+    }
 }
