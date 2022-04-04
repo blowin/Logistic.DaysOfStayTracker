@@ -81,8 +81,10 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             
             if (request.DeletedDayOfStays.Count > 0)
             {
+                var removeKeys = request.DeletedDayOfStays.Keys.ToList();
                 var removeDayOfStays = _db.DayOfStays.AsTracking()
-                    .Where(e => request.DeletedDayOfStays.ContainsKey(e.Id));
+                    .Where(e => removeKeys.Contains(e.Id))
+                    .AsEnumerable();
 
                 _db.DayOfStays.RemoveRange(removeDayOfStays);
             }
