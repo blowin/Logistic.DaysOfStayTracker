@@ -1,4 +1,7 @@
 using System;
+using System.Threading.Tasks;
+using ElectronNET.API;
+using ElectronNET.API.Entities;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -68,6 +71,20 @@ namespace Logistic.DaysOfStayTracker.Blazor
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+            
+            if (HybridSupport.IsElectronActive)
+            {
+                Task.Run(async () =>
+                {
+                    await Electron.WindowManager.CreateBrowserViewAsync();
+                    await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions
+                    {
+                        MinWidth = 700,
+                        MinHeight = 500,
+                        Center = true
+                    });
+                });   
+            }
         }
     }
 }

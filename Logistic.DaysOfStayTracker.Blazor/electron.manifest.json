@@ -1,0 +1,35 @@
+{
+  "executable": "Logistic.DaysOfStayTracker.Blazor",
+  "splashscreen": {
+    "imageFile": ""
+  },
+  "name": "Logistic.DaysOfStayTracker.Blazor",
+  "author": "",
+  "singleInstance": false,
+  "environment": "Production",
+  "build": {
+    "appId": "com.Logistic.DaysOfStayTracker.Blazor.app",
+    "productName": "Logistic.DaysOfStayTracker.Blazor",
+    "copyright": "Copyright © 2020",
+    "buildVersion": "1.0.0",
+    "compression": "maximum",
+    "directories": {
+      "output": "../../../bin/Desktop"
+    },
+    "extraResources": [
+      {
+        "from": "./bin",
+        "to": "bin",
+        "filter": [ "**/*" ]
+      }
+    ],
+    "files": [
+      {
+        "from": "./ElectronHostHook/node_modules",
+        "to": "ElectronHostHook/node_modules",
+        "filter": [ "**/*" ]
+      },
+      "**/*"
+    ]
+  }
+}
