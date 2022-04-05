@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 
-public class DriverUpsertRequest : IValidationRequest
+public class DriverUpsertRequest : IValidationRequest<Driver>
 {
     public Guid? Id { get; set; }
     public string? FirstName { get; set; }
@@ -32,7 +32,7 @@ public class DriverUpsertRequest : IValidationRequest
 
 public record DriverUpsertModelGet(Guid Id) : IRequest<DriverUpsertRequest>;
 
-public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsertRequest>, IRequestHandler<DriverUpsertModelGet, DriverUpsertRequest>
+public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsertRequest, Driver>, IRequestHandler<DriverUpsertModelGet, DriverUpsertRequest>
 {
     private readonly AppDbContext _db;
     private readonly IEnumerable<IValidator<Driver>> _driverValidators;
@@ -48,7 +48,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
         _dayOfStayValidators = dayOfStayValidators;
     }
 
-    public async Task<Result<Unit, ICollection<string>>> Handle(DriverUpsertRequest request, CancellationToken cancellationToken)
+    public async Task<Result<Driver, ICollection<string>>> Handle(DriverUpsertRequest request, CancellationToken cancellationToken)
     {
         var driver = request.Id != null
             ? await _db.Drivers.AsTracking().FirstAsync(e => e.Id == request.Id, cancellationToken)
@@ -62,7 +62,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
 
         var result = await _driverValidators.ValidateAsync(driver, cancellationToken);
         if (result.IsFailure)
-            return result;
+            return Result.Failure<Driver, ICollection<string>>(result.Error);
 
         var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
         try
@@ -100,7 +100,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
                         continue;
                     
                     await transaction.RollbackAsync(cancellationToken);
-                    return dayOfStayValidateResult;
+                    return Result.Failure<Driver, ICollection<string>>(dayOfStayValidateResult.Error);
                 }
             }
 
@@ -113,7 +113,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             _logger.LogError(e, "{@Request}", request);
             await transaction.RollbackAsync(cancellationToken);
         }
-        return Unit.Value;
+        return driver;
     }
 
     public async Task<DriverUpsertRequest> Handle(DriverUpsertModelGet request, CancellationToken cancellationToken)

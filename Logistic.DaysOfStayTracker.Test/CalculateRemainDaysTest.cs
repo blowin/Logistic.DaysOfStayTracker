@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
-using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
-using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
-using Logistic.DaysOfStayTracker.DependencyInjection;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -77,8 +72,8 @@ public class CalculateRemainDaysTest
     public async Task CalculateRemainDaysHandlerTest(CalculateRemainDaysResponse expectedResponse, DateOnly requestDate,
         (DateOnly from, DateOnly to)[] dates)
     {
-        var provider = await CreateWithDriver();
-        using var scope = provider.CreateScope();
+        using var createScope = await new TestServiceProviderFactory().CreateAsync();
+        using var scope = createScope.Provider.CreateScope();
         var sp = scope.ServiceProvider;
             
         var mediator = sp.GetRequiredService<IMediator>();
@@ -100,32 +95,5 @@ public class CalculateRemainDaysTest
         var result = await mediator.Send(new CalculateRemainDaysRequest(driver.Id, requestDate));
         
         Assert.Equal(expectedResponse, result);
-    }
-
-    private static async Task<IServiceProvider> CreateWithDriver()
-    {
-        var dbName = Guid.NewGuid().ToString("N");
-        var appConfig = new AppServicesConfiguration(builder =>
-        {
-            builder.UseInMemoryDatabase(dbName)
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-        });
-        
-        var collection = new ServiceCollection()
-            .AddAppServices(appConfig)
-            .BuildServiceProvider();
-
-        using var scope = collection.CreateScope();
-        
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.EnsureCreatedAsync();
-
-        await scope.ServiceProvider.GetRequiredService<IMediator>().Send(new DriverUpsertRequest
-        {
-            FirstName = "Андрей",
-            LastName = "Покров"
-        });
-
-        return collection;
     }
 }
