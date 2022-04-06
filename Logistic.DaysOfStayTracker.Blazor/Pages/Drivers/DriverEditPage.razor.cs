@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Blazor.Components;
-using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
-using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Components;
-using MudBlazor;
 
 namespace Logistic.DaysOfStayTracker.Blazor.Pages.Drivers;
 
@@ -24,11 +21,7 @@ public partial class DriverEditPage
     private NavigationManager Navigation { get; set; } = null!;
     
     private DriverUpsertRequest _model = null!;
-    private readonly DayOfStaySearchRequest _dayOfStaySearchRequest = new()
-    {
-        DriverId = Guid.Empty,
-        Start = DateTime.Today.AddDays(-CalculateRemainDaysHandler.CheckRangeInDays)
-    };
+    private DayOfStaySearchRequest _dayOfStaySearchRequest = new(DateTime.Today.AddDays(-230), Guid.Empty);
 
     private ICollection<string> _errors = Array.Empty<string>();
     
@@ -38,7 +31,7 @@ public partial class DriverEditPage
     {
         _model = Id == null ? new DriverUpsertRequest() : await Mediator.Send(new DriverUpsertModelGet(Id.Value));
         if (Id != null)
-            _dayOfStaySearchRequest.DriverId = Id.Value;
+            _dayOfStaySearchRequest = _dayOfStaySearchRequest with {DriverId = Id.Value};
     }
 
     private async Task Submit()

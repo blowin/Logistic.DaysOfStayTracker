@@ -11,7 +11,7 @@ public record CalculateRemainDaysResponse(int RemainDays, DateOnly? DateOfAddDay
 public sealed class CalculateRemainDaysHandler 
     : IRequestHandler<CalculateRemainDaysRequest, CalculateRemainDaysResponse>
 {
-    public const int CheckRangeInDays = 180;
+    private const int CheckRangeInDays = 180;
     
     private AppDbContext _db;
 
@@ -28,34 +28,36 @@ public sealed class CalculateRemainDaysHandler
         
         var remainDay = maxInYearDays - Sum(dates);
         
-        var (additionalDate, addDays, beenInEurope) = CalculateAdditionalDate(request, dates);
+        var (additionalDate, addDays, beenInEurope, additionalInEurope) = CalculateAdditionalDate(request, dates);
         if (beenInEurope)
-            remainDay += 1;
+            remainDay += additionalInEurope;
         
         var response = new CalculateRemainDaysResponse((int)remainDay, additionalDate, addDays);
         return response;
     }
 
-    private static (DateOnly? AdditionalDate, int AdditionalDays, bool BeenInEurope) CalculateAdditionalDate(CalculateRemainDaysRequest request, List<DateRange> dates)
+    private static (DateOnly? AdditionalDate, int AdditionalDays, bool BeenInEurope, int AdditionalInEurope) CalculateAdditionalDate(CalculateRemainDaysRequest request, List<DateRange> dates)
     {
         var halfOfYearAgo = request.Date.AddDays(-CheckRangeInDays);
         
         var additionalRange = dates.FirstOrDefault(e => e.EntryDate <= halfOfYearAgo && halfOfYearAgo <= e.ExitDate);
         if (additionalRange != null)
         {
+            var entryDate = additionalRange.EntryDate;
             additionalRange = additionalRange with {EntryDate = additionalRange.EntryDate.Max(halfOfYearAgo)};
-            var additionalDate = additionalRange.EntryDate.AddDays(CheckRangeInDays);
-            return (additionalDate, additionalRange.TotalDays - 1, true);   
+            var additionalDate = additionalRange.EntryDate.AddDays(1).AddDays(CheckRangeInDays);
+            var additionalInEuropeDateRange = new DateRangeValueType(entryDate, additionalRange.EntryDate);;
+            return (additionalDate, additionalRange.TotalDays - 1, true, additionalInEuropeDateRange.TotalDays);   
         }
 
         var firstAdditionalRange = dates.FirstOrDefault(e => e.EntryDate > halfOfYearAgo);
         if (firstAdditionalRange != null)
         {
             var additionalDate = firstAdditionalRange.EntryDate.AddDays(CheckRangeInDays);
-            return (additionalDate, firstAdditionalRange.TotalDays, false);
+            return (additionalDate, firstAdditionalRange.TotalDays, false, 0);
         }
         
-        return (null, 0, false);
+        return (null, 0, false, 0);
     }
 
     private Task<List<DateRange>> DateRangesFromRangeAsync(DateOnly fromDate, CalculateRemainDaysRequest request, 

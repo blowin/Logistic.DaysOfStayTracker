@@ -19,7 +19,7 @@ public class CalculateRemainDaysTest
         {
             yield return new object[]
             {
-                new CalculateRemainDaysResponse(12, DateOnly.Parse("31.03.2022"), 3),
+                new CalculateRemainDaysResponse(19, DateOnly.Parse("01.04.2022"), 3),
                 DateOnly.Parse("31.03.2022"),
                 new []
                 {
@@ -32,7 +32,7 @@ public class CalculateRemainDaysTest
             };
             yield return new object[]
             {
-                new CalculateRemainDaysResponse(26, DateOnly.Parse("01.04.2022"), 7),
+                new CalculateRemainDaysResponse(31, DateOnly.Parse("02.04.2022"), 7),
                 DateOnly.Parse("01.04.2022"),
                 new []
                 {

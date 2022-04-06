@@ -25,7 +25,7 @@ public partial class DayOfStayTable
     private NavigationManager NavigationManager { get; set; } = null!;
 
     [Parameter]
-    public DayOfStaySearchRequest SearchRequest { get; set; } = new();
+    public DayOfStaySearchRequest SearchRequest { get; set; } = null!;
 
     [Parameter]
     public DriverUpsertRequest DriverUpsertRequest { get; set; } = new();
@@ -37,7 +37,6 @@ public partial class DayOfStayTable
     public AppDbContext Context { get; set; } = null!;
     
     private List<DayOfStay> _items = new();
-    private ICollection<string>? _errors;
     private Dictionary<Guid, Country> _countries = null!;
     private CalculateRemainDaysResponse? _calculateRemainDaysResponse;
     
@@ -61,16 +60,9 @@ public partial class DayOfStayTable
     
     public async Task SearchAsync()
     {
-        _errors = null;
-        var result = await Mediator.Send(SearchRequest);
-        
-        result.Match(list =>
-            {
-                _items = list;
-                ApplyDeleteItems();
-                _items.AddRange(DriverUpsertRequest.CreateDayOfStays);
-            }, 
-            errors => _errors = errors);
+        _items = await Mediator.Send(SearchRequest);
+        ApplyDeleteItems();
+        _items.AddRange(DriverUpsertRequest.CreateDayOfStays);
     }
 
     private void Delete(DayOfStay dayOfStay)
@@ -89,7 +81,7 @@ public partial class DayOfStayTable
     {
         var op = new DialogOptions{ FullWidth = true };
         var parameters = CreateDayOfStayDialog.CreateParameters(_countries.Select(e => e.Value).ToList(), 
-            SearchRequest.DriverId ?? Guid.Empty, Mediator);
+            SearchRequest.DriverId, Mediator);
         
         var dialog = DialogService.Show<CreateDayOfStayDialog>("Создать", parameters, op);
         var result = await dialog.Result;
