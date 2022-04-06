@@ -4,6 +4,7 @@ using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.DependencyInjection;
+using Logistic.DaysOfStayTracker.Migration;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -35,18 +36,21 @@ namespace Logistic.DaysOfStayTracker.Blazor
             var appServicesConfig = new AppServicesConfiguration(builder =>
             {
                 //builder.UseInMemoryDatabase("db").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                builder.UseSqlite("Data Source=app.db");
+                builder.UseSqlite("Data Source=app.db", b =>
+                {
+                    b.MigrationsAssembly(typeof(AppDesignTimeDbContextFactory).Assembly.FullName);
+                });
             });
             services.AddAppServices(appServicesConfig);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
+        public async void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             using (var scope = serviceProvider.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                db.Database.EnsureCreated();
+                await db.Database.MigrateAsync();
                 //db.Initialize().ConfigureAwait(false).GetAwaiter().GetResult();
             }
             

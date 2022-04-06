@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logistic.DaysOfStayTracker.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logistic.DaysOfStayTracker.Test", "Logistic.DaysOfStayTracker.Test\Logistic.DaysOfStayTracker.Test.csproj", "{121E2AF7-E295-4959-A30A-59CC6AE29C3B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logistic.DaysOfStayTracker.Migration", "Logistic.DaysOfStayTracker.Migration\Logistic.DaysOfStayTracker.Migration.csproj", "{4DA887A7-943B-4082-83ED-9470D1050613}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{121E2AF7-E295-4959-A30A-59CC6AE29C3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{121E2AF7-E295-4959-A30A-59CC6AE29C3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{121E2AF7-E295-4959-A30A-59CC6AE29C3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DA887A7-943B-4082-83ED-9470D1050613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DA887A7-943B-4082-83ED-9470D1050613}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DA887A7-943B-4082-83ED-9470D1050613}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DA887A7-943B-4082-83ED-9470D1050613}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
