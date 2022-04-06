@@ -8,9 +8,18 @@
                 <MudText Color="Color.Error">@error</MudText>
             }
         </MudItem>
-        <MudItem xl="12" xs="12" xxl="12">
-            <MudText Typo="Typo.h5">Водитель</MudText>
-        </MudItem>
+        @if (_calculateRemainDaysResponse != null)
+        {
+            <MudItem Class="pt-4" xl="12" xs="12" xxl="12">
+                @if (_model.HasDeleteOrCreateDateOfStays)
+                {
+                    <MudText Align="Align.Center" Color="Color.Warning">Внимание! Были изменения в датах, для корретного подсчёта, сохраните данные и откройте запись повторно.</MudText>
+                }
+                <CalculateRemainDaysComponent RemainDays="@_calculateRemainDaysResponse.RemainDays"
+                                              DateOfAddDays="@_calculateRemainDaysResponse.DateOfAddDays"
+                                              AddDays="@_calculateRemainDaysResponse.AddDays"/>
+            </MudItem>
+        }
          <MudItem xs="6">
             <MudTextField @bind-Value="_model.FirstName" For="@(() => _model.FirstName)" Immediate="true" Label="Имя"></MudTextField>
         </MudItem>

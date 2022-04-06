@@ -22,7 +22,8 @@ public partial class DriverEditPage
     
     private DriverUpsertRequest _model = null!;
     private DayOfStaySearchRequest _dayOfStaySearchRequest = new(DateTime.Today.AddDays(-230), Guid.Empty);
-
+    private CalculateRemainDaysResponse? _calculateRemainDaysResponse;
+    
     private ICollection<string> _errors = Array.Empty<string>();
     
     private DayOfStayTable _dayOfStayTable = null!;
@@ -31,7 +32,12 @@ public partial class DriverEditPage
     {
         _model = Id == null ? new DriverUpsertRequest() : await Mediator.Send(new DriverUpsertModelGet(Id.Value));
         if (Id != null)
+        {
             _dayOfStaySearchRequest = _dayOfStaySearchRequest with {DriverId = Id.Value};
+
+            var request = new CalculateRemainDaysRequest(Id.Value, DateOnly.FromDateTime(DateTime.Today));
+            _calculateRemainDaysResponse = await Mediator.Send(request);
+        }
     }
 
     private async Task Submit()

@@ -9,20 +9,6 @@
     <MudItem xs="12">
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddDayOfStay">Добавить день пребывания</MudButton>
     </MudItem>
-
-    @if (_calculateRemainDaysResponse != null)
-    {
-        <MudItem Class="pt-4" xl="12" xs="12" xxl="12">
-            @if (DriverUpsertRequest.HasDeleteOrCreateDateOfStays)
-            {
-                <MudText Align="Align.Center" Color="Color.Warning">Внимание! Были изменения в датах, для корретного подсчёта, сохраните данные и откройте запись повторно.</MudText>
-            }
-            <CalculateRemainDaysComponent RemainDays="@_calculateRemainDaysResponse.RemainDays"
-                                          DateOfAddDays="@_calculateRemainDaysResponse.DateOfAddDays"
-                                          AddDays="@_calculateRemainDaysResponse.AddDays"/>
-        </MudItem>
-    }
-
     <MudItem xl="12" xs="12" xxl="12">
         <MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
             <HeaderContent>

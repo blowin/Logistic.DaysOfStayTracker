@@ -36,21 +36,13 @@ public partial class DayOfStayTable
     public AppDbContext Context { get; set; } = null!;
     
     private List<DayOfStay> _items = new();
-    private CalculateRemainDaysResponse? _calculateRemainDaysResponse;
     
     private MudDatePicker _pickerStart = null!;
     private MudDatePicker _pickerEnd = null!;
     
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        var request = DriverUpsertRequest.Id != null ?
-            new CalculateRemainDaysRequest(DriverUpsertRequest.Id.Value, DateOnly.FromDateTime(DateTime.Today)) :
-            null;
-        
-        if(request != null)
-            _calculateRemainDaysResponse = await Mediator.Send(request);
-        
-        await SearchAsync();
+        return SearchAsync();
     }
     
     public async Task SearchAsync()
