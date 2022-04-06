@@ -4,16 +4,14 @@
 }
 <MudTable Items="@_items" Hover="true" Breakpoint="Breakpoint.Md" LoadingProgressColor="Color.Info">
     <HeaderContent>
-        <MudTh>Имя</MudTh>
-        <MudTh>Фамилия</MudTh>
+        <MudTh>Полное имя</MudTh>
         <MudTh>Действия</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Имя">@context.FirstName</MudTd>
-        <MudTd DataLabel="Фамилия">@context.LastName</MudTd>
+        <MudTd DataLabel="Полное имя">@context.LastName @context.FirstName</MudTd>
         <MudTd>
-            <MudButton Color="Color.Primary" OnClick="() => Edit(context.Id)">Изменить</MudButton>
-            <MudButton Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))">Удалить</MudButton>
+            <MudIconButton Icon="@Icons.Outlined.Preview" Color="Color.Primary" OnClick="@(() => Edit(context.Id))"/>
+            <MudIconButton Icon="@Icons.Outlined.Delete" Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))"/>
         </MudTd>
     </RowTemplate>
     <PagerContent>
