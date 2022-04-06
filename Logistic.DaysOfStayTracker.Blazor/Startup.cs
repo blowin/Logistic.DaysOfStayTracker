@@ -33,10 +33,11 @@ namespace Logistic.DaysOfStayTracker.Blazor
             services.AddServerSideBlazor();
             services.AddMudServices();
 
+            var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var appServicesConfig = new AppServicesConfiguration(builder =>
             {
                 //builder.UseInMemoryDatabase("db").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                builder.UseSqlite("Data Source=app.db", b =>
+                builder.UseSqlite(connectionString, b =>
                 {
                     b.MigrationsAssembly(typeof(AppDesignTimeDbContextFactory).Assembly.FullName);
                 });
