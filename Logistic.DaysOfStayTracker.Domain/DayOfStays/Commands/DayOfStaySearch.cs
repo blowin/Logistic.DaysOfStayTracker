@@ -9,7 +9,6 @@ public record DayOfStaySearchRequest : IValidationRequest<List<DayOfStay>>
     public DateTime? Start { get; set; }
     public DateTime? End { get; set; }
     public Guid? DriverId { get; set; }
-    public DateTime? Year { get; set; }
 }
 
 public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStaySearchRequest, List<DayOfStay>>
@@ -23,7 +22,7 @@ public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStay
 
     public async Task<Result<List<DayOfStay>, ICollection<string>>> Handle(DayOfStaySearchRequest request, CancellationToken cancellationToken)
     {
-        if (request.End == null && request.Start == null && request.Year == null)
+        if (request.End == null && request.Start == null)
         {
             return Result.Failure<List<DayOfStay>, ICollection<string>>(new List<string>
             {
@@ -38,19 +37,13 @@ public sealed class DayOfStaySearchHandler : IValidationRequestHandler<DayOfStay
         if (request.Start.HasValue)
         {
             var start = DateOnly.FromDateTime(request.Start.Value);
-            query = query.Where(e => e.EntryDate <= start && e.ExitDate >= start);
+            query = query.Where(e => e.EntryDate >= start);
         }
         
         if (request.End.HasValue)
         {
             var end = DateOnly.FromDateTime(request.End.Value);
-            query = query.Where(e => e.EntryDate <= end && e.ExitDate >= end);
-        }
-
-        if (request.Year.HasValue)
-        {
-            var year = request.Year.Value.Year;
-            query = query.Where(e => e.EntryDate.Year == year || e.ExitDate.Year == year);
+            query = query.Where(e => e.ExitDate <= end);
         }
 
         if (request.DriverId.HasValue)

@@ -11,6 +11,8 @@ public record CalculateRemainDaysResponse(int RemainDays, DateOnly? DateOfAddDay
 public sealed class CalculateRemainDaysHandler 
     : IRequestHandler<CalculateRemainDaysRequest, CalculateRemainDaysResponse>
 {
+    public const int CheckRangeInDays = 180;
+    
     private AppDbContext _db;
 
     public CalculateRemainDaysHandler(AppDbContext db)
@@ -21,7 +23,7 @@ public sealed class CalculateRemainDaysHandler
     public async Task<CalculateRemainDaysResponse> Handle(CalculateRemainDaysRequest request, CancellationToken cancellationToken)
     {
         const int maxInYearDays = 90;
-        var ago180 = request.Date.AddDays(-180);
+        var ago180 = request.Date.AddDays(-CheckRangeInDays);
         var dates = await DateRangesFromRangeAsync(ago180, request, cancellationToken);
         
         var remainDay = maxInYearDays - Sum(dates);
@@ -36,22 +38,20 @@ public sealed class CalculateRemainDaysHandler
 
     private static (DateOnly? AdditionalDate, int AdditionalDays, bool BeenInEurope) CalculateAdditionalDate(CalculateRemainDaysRequest request, List<DateRange> dates)
     {
-        const int checkRange = 180;
-        
-        var halfOfYearAgo = request.Date.AddDays(-checkRange);
+        var halfOfYearAgo = request.Date.AddDays(-CheckRangeInDays);
         
         var additionalRange = dates.FirstOrDefault(e => e.EntryDate <= halfOfYearAgo && halfOfYearAgo <= e.ExitDate);
         if (additionalRange != null)
         {
             additionalRange = additionalRange with {EntryDate = additionalRange.EntryDate.Max(halfOfYearAgo)};
-            var additionalDate = additionalRange.EntryDate.AddDays(checkRange);
+            var additionalDate = additionalRange.EntryDate.AddDays(CheckRangeInDays);
             return (additionalDate, additionalRange.TotalDays - 1, true);   
         }
 
         var firstAdditionalRange = dates.FirstOrDefault(e => e.EntryDate > halfOfYearAgo);
         if (firstAdditionalRange != null)
         {
-            var additionalDate = firstAdditionalRange.EntryDate.AddDays(checkRange);
+            var additionalDate = firstAdditionalRange.EntryDate.AddDays(CheckRangeInDays);
             return (additionalDate, firstAdditionalRange.TotalDays, false);
         }
         

@@ -27,7 +27,7 @@ public partial class DriverEditPage
     private readonly DayOfStaySearchRequest _dayOfStaySearchRequest = new()
     {
         DriverId = Guid.Empty,
-        Year = DateTime.Today
+        Start = DateTime.Today.AddDays(-CalculateRemainDaysHandler.CheckRangeInDays)
     };
 
     private ICollection<string> _errors = Array.Empty<string>();

@@ -43,7 +43,6 @@ public partial class DayOfStayTable
     
     private MudDatePicker _pickerStart = null!;
     private MudDatePicker _pickerEnd = null!;
-    private MudDatePicker _pickerYear = null!;
     
     protected override async Task OnInitializedAsync()
     {
