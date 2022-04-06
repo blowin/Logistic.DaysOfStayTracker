@@ -36,7 +36,6 @@ namespace Logistic.DaysOfStayTracker.Blazor
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var appServicesConfig = new AppServicesConfiguration(builder =>
             {
-                //builder.UseInMemoryDatabase("db").ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 builder.UseSqlite(connectionString, b =>
                 {
                     b.MigrationsAssembly(typeof(AppDesignTimeDbContextFactory).Assembly.FullName);
@@ -52,7 +51,6 @@ namespace Logistic.DaysOfStayTracker.Blazor
             {
                 var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
                 await db.Database.MigrateAsync();
-                //db.Initialize().ConfigureAwait(false).GetAwaiter().GetResult();
             }
             
             if (env.IsDevelopment())
