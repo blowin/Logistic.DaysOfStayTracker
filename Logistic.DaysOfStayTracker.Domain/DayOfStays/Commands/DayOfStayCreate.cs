@@ -5,9 +5,7 @@ using Logistic.DaysOfStayTracker.Core.Extension;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 
-public record DayOfStayCreateRequest(Guid DriverId,
-    Guid EntryCountryId, DateOnly EntryDate,
-    Guid ExitCountryId, DateOnly ExitDate) : IValidationRequest<DayOfStay>;
+public record DayOfStayCreateRequest(Guid DriverId, DateOnly EntryDate, DateOnly ExitDate) : IValidationRequest<DayOfStay>;
 
 public sealed class DayOfStayCreateHandler : IValidationRequestHandler<DayOfStayCreateRequest, DayOfStay>
 {
@@ -24,9 +22,7 @@ public sealed class DayOfStayCreateHandler : IValidationRequestHandler<DayOfStay
         {
             DriverId = request.DriverId,
             EntryDate = request.EntryDate,
-            ExitDate = request.ExitDate,
-            EntryCountryId = request.EntryCountryId,
-            ExitCountryId = request.ExitCountryId
+            ExitDate = request.ExitDate
         };
 
         var result = await _validators.ValidateAsync(createEntity, cancellationToken);

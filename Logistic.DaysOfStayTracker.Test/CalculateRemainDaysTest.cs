@@ -78,14 +78,13 @@ public class CalculateRemainDaysTest
             
         var mediator = sp.GetRequiredService<IMediator>();
         var db = sp.GetRequiredService<AppDbContext>();
-        var countryId = db.Countries.First().Id;
         var driver = db.Drivers.First();
             
         // init
         var upsertRequest = new DriverUpsertRequest { Id = driver.Id };
         foreach (var (from, to) in dates)
         {
-            var createRequest = new DayOfStayCreateRequest(driver.Id, countryId, from, countryId, to);
+            var createRequest = new DayOfStayCreateRequest(driver.Id, from, to);
             var res = await mediator.Send(createRequest);
             upsertRequest.CreateDayOfStays.Add(res.Value);
         }

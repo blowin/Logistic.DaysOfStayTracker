@@ -21,18 +21,6 @@ public class DayOfStayValidator : AbstractValidator<DayOfStay>
             context.AddFailure("Дата въезда не может быть позже даты выезда");
             return;
         }
-
-        if (entity.EntryCountryId == Guid.Empty)
-        {
-            context.AddFailure("Необходимо указать страну въезда");
-            return;
-        }
-        
-        if (entity.ExitCountryId == Guid.Empty)
-        {
-            context.AddFailure("Необходимо указать страну выезда");
-            return;
-        }
         
         if(entity.DriverId == Guid.Empty)
             return;

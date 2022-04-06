@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CSharpFunctionalExtensions;
 using Logistic.DaysOfStayTracker.Core;
-using Logistic.DaysOfStayTracker.Core.Countries;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 using Logistic.DaysOfStayTracker.Core.Drivers;
@@ -37,7 +36,6 @@ public partial class DayOfStayTable
     public AppDbContext Context { get; set; } = null!;
     
     private List<DayOfStay> _items = new();
-    private Dictionary<Guid, Country> _countries = null!;
     private CalculateRemainDaysResponse? _calculateRemainDaysResponse;
     
     private MudDatePicker _pickerStart = null!;
@@ -45,9 +43,6 @@ public partial class DayOfStayTable
     
     protected override async Task OnInitializedAsync()
     {
-        var countries = await Context.Countries.ToListAsync();
-        _countries = countries.ToDictionary(e => e.Id);
-        
         var request = DriverUpsertRequest.Id != null ?
             new CalculateRemainDaysRequest(DriverUpsertRequest.Id.Value, DateOnly.FromDateTime(DateTime.Today)) :
             null;
@@ -80,8 +75,7 @@ public partial class DayOfStayTable
     private async Task AddDayOfStay()
     {
         var op = new DialogOptions{ FullWidth = true };
-        var parameters = CreateDayOfStayDialog.CreateParameters(_countries.Select(e => e.Value).ToList(), 
-            SearchRequest.DriverId, Mediator);
+        var parameters = CreateDayOfStayDialog.CreateParameters(SearchRequest.DriverId, Mediator);
         
         var dialog = DialogService.Show<CreateDayOfStayDialog>("Создать", parameters, op);
         var result = await dialog.Result;

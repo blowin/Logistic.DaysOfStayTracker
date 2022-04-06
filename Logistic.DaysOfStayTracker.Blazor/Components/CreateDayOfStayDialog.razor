@@ -1,5 +1,4 @@
-﻿@using Logistic.DaysOfStayTracker.Core.Countries
-@using Logistic.DaysOfStayTracker.Core.DayOfStays
+﻿@using Logistic.DaysOfStayTracker.Core.DayOfStays
 @using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands
 @using MediatR
 
@@ -9,21 +8,7 @@
         {
             <MudText Color="Color.Error">@error</MudText>
         }
-        
-        <MudSelect @bind-Value="@_entryCountry" T="Country" Label="Страна въезда" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Required="true">
-            @foreach (var country in Countries)
-            {
-                <MudSelectItem Value="@country">@country.Name</MudSelectItem>
-            }
-        </MudSelect>
         <MudDatePicker @bind-Date="@_entryDate" PickerVariant="PickerVariant.Dialog" Editable="true" Label="Дата въезда" Required="true"></MudDatePicker>
-
-        <MudSelect Class="pt-5" @bind-Value="@_exitCountry" T="Country" Label="Страна выезда" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter" Required="true">
-            @foreach (var country in Countries)
-            {
-                <MudSelectItem Value="@country">@country.Name</MudSelectItem>
-            }
-        </MudSelect>
         <MudDatePicker @bind-Date="@_exitDate" PickerVariant="PickerVariant.Dialog" Editable="true" Label="Дата выезда" Required="true"></MudDatePicker>
     </DialogContent>
     <DialogActions>
@@ -34,14 +19,9 @@
 @code {
     private ICollection<string> _errorMessage = Array.Empty<string>();
 
-    private Country _entryCountry = null!;
     private DateTime? _exitDate = DateTime.Now;
     
-    private Country _exitCountry = null!;
     private DateTime? _entryDate = DateTime.Now;
-
-    [Parameter]
-    public IReadOnlyList<Country> Countries { get; set; } = Array.Empty<Country>();
     
     [Parameter]
     public Guid DriverId { get; set; }
@@ -51,12 +31,6 @@
 
     [CascadingParameter]
     public MudDialogInstance MudDialog { get; set; } = null!;
-
-    protected override void OnInitialized()
-    {
-        _entryCountry = Countries.First();
-        _exitCountry = Countries.First();
-    }
 
     async Task Submit()
     {
@@ -74,8 +48,8 @@
         }
 
         var request = new DayOfStayCreateRequest(DriverId,
-            _entryCountry.Id, DateOnly.FromDateTime(_entryDate.Value.ToLocalTime()),
-            _exitCountry.Id, DateOnly.FromDateTime(_exitDate.Value.ToLocalTime())
+            DateOnly.FromDateTime(_entryDate.Value.ToLocalTime()),
+            DateOnly.FromDateTime(_exitDate.Value.ToLocalTime())
             );
         
         var createResult = await Mediator.Send(request);
@@ -97,11 +71,10 @@
         MudDialog.Close(dialogResult);
     }
     
-    public static DialogParameters CreateParameters(IReadOnlyList<Country> countries, Guid driverId, IMediator mediator)
+    public static DialogParameters CreateParameters(Guid driverId, IMediator mediator)
     {
         var parameters = new DialogParameters
         {
-            {nameof(Countries), countries},
             {nameof(DriverId), driverId},
             {nameof(Mediator), mediator},
         };

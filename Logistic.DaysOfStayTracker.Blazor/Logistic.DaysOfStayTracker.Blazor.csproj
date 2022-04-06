@@ -19,4 +19,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\Countries\CountryEditPage.razor" />
+    <_ContentIncludedByDefault Remove="Pages\Countries\CountryPage.razor" />
+  </ItemGroup>
 </Project>
