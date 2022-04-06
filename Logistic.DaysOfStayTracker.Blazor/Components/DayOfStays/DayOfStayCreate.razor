@@ -1,0 +1,103 @@
+﻿@using MediatR
+@using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands
+@using Logistic.DaysOfStayTracker.Core.DayOfStays
+<MudGrid>
+    @if (_errorMessage.Count > 0)
+    {
+        <MudItem xs="12">
+            @foreach (var error in _errorMessage)
+            {
+                <MudText Color="Color.Error">@error</MudText>
+            }
+        </MudItem>    
+    }
+    
+    <MudItem xs="3">
+        <MudDatePicker Date="@_entryDate" DateChanged="@((newV) => CalculateRange(newV, out _entryDate))" 
+                       PickerVariant="PickerVariant.Dialog" Editable="true" Label="Дата въезда" 
+                       MaxDate="@(_exitDate ?? DateTime.Today)"/>
+    </MudItem>
+    <MudItem xs="3">
+        <MudDatePicker Date="@_exitDate" DateChanged="@((newV) => CalculateRange(newV, out _exitDate))" 
+                       PickerVariant="PickerVariant.Dialog" Editable="true" Label="Дата выезда" 
+                       MinDate="@(_entryDate ?? DateTime.Today)"/>
+    </MudItem>
+    <MudItem xs="2">
+        <MudNumericField @bind-Value="_calcDays" Label="Разница" Variant="Variant.Text" ReadOnly="true" />
+    </MudItem>
+    <MudItem xs="4">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await Create())">Добавить</MudButton>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private ICollection<string> _errorMessage = Array.Empty<string>();
+    
+    private DateTime? _exitDate;
+    private DateTime? _entryDate;
+    private int? _calcDays;
+    
+    [Inject]
+    public IMediator Mediator { get; set; } = null!;
+    
+    [Parameter]
+    public Guid DriverId { get; set; }
+
+    [Parameter]
+    public EventCallback<DayOfStay> OnCreated { get; set; }
+
+    private async Task Create()
+    {
+        if (_entryDate == null)
+        {
+            _errorMessage = new []{"Необходимо указать дату въезда"};
+            return;
+        }
+
+        if (_exitDate == null)
+        {
+            _errorMessage = new []{ "Необходимо указать дату выезда" };
+            return;
+        }
+
+        var request = new DayOfStayCreateRequest(DriverId,
+            DateOnly.FromDateTime(_entryDate.Value.ToLocalTime()),
+            DateOnly.FromDateTime(_exitDate.Value.ToLocalTime())
+            );
+        
+        var createResult = await Mediator.Send(request);
+        
+        if (createResult.IsFailure)
+        {
+            _errorMessage = createResult.Error;
+            return;
+        }
+
+        await OnCreated.InvokeAsync(createResult.Value);
+        
+        _errorMessage = Array.Empty<string>();
+        _exitDate = null;
+        _entryDate = null;
+        _calcDays = null;
+    }
+
+    private void CalculateRange(DateTime? newValue, out DateTime? changeField)
+    {
+        changeField = newValue;
+        if (_entryDate == null)
+        {
+            _calcDays = null;
+            return;
+        }
+        
+        if (_exitDate == null)
+        {
+            _calcDays = null;
+            return;
+        }
+
+        var dateRange = new DateRangeValueType(DateOnly.FromDateTime(_entryDate.Value), DateOnly.FromDateTime(_exitDate.Value));
+        _calcDays = dateRange.TotalDays;
+    }
+
+}

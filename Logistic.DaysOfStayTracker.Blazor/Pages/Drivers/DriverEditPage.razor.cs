@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Logistic.DaysOfStayTracker.Blazor.Components;
+using Logistic.DaysOfStayTracker.Blazor.Components.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;

@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using CSharpFunctionalExtensions;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
-using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
-using X.PagedList;
 
-namespace Logistic.DaysOfStayTracker.Blazor.Components;
+namespace Logistic.DaysOfStayTracker.Blazor.Components.DayOfStays;
 
 public partial class DayOfStayTable
 {
@@ -64,17 +59,8 @@ public partial class DayOfStayTable
         _items.RemoveAll(response => DriverUpsertRequest.DeletedDayOfStays.ContainsKey(response.Id));
     }
 
-    private async Task AddDayOfStay()
+    private void AddDayOfStay(DayOfStay createModel)
     {
-        var op = new DialogOptions{ FullWidth = true };
-        var parameters = CreateDayOfStayDialog.CreateParameters(SearchRequest.DriverId, Mediator);
-        
-        var dialog = DialogService.Show<CreateDayOfStayDialog>("Создать", parameters, op);
-        var result = await dialog.Result;
-        if(result.Cancelled)
-            return;
-
-        var createModel = (DayOfStay) result.Data;
         DriverUpsertRequest.CreateDayOfStays.Add(createModel);
         _items.Add(createModel);
     }
