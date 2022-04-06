@@ -1,3 +1,4 @@
+@using Logistic.DaysOfStayTracker.Core.Extension
 @foreach (var error in _errors)
 {
     <MudText Color="Color.Error">@error</MudText>
@@ -8,7 +9,13 @@
         <MudTh>Действия</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Полное имя">@context.LastName @context.FirstName</MudTd>
+        <MudTd DataLabel="Полное имя">
+             @context.LastName @context.FirstName
+            @if (context.VisaExpiresSoon)
+            {
+                <MudIcon Class="pl-3" Color="Color.Error" Icon="@Icons.Material.Outlined.Warning" Title="Скоро окончание срока визы"/>
+            }
+        </MudTd>
         <MudTd>
             <MudIconButton Icon="@Icons.Outlined.Preview" Color="Color.Primary" OnClick="@(() => Edit(context.Id))"/>
             <MudIconButton Icon="@Icons.Outlined.Delete" Color="Color.Primary" OnClick="@(async () => await Delete(context.Id))"/>
