@@ -5,13 +5,13 @@ using Logistic.DaysOfStayTracker.Core.Extension;
 
 namespace Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 
-public record DayOfStayCreateRequest(Guid DriverId, DateOnly EntryDate, DateOnly ExitDate) : IValidationRequest<DayOfStay>;
+public record DayOfStayCreateRequest(Guid DriverId, DateOnly EntryDate, DateOnly ExitDate, ICollection<Guid> ExcludeEntities, ICollection<DayOfStay> AdditionalDayOfStays) : IValidationRequest<DayOfStay>;
 
 public sealed class DayOfStayCreateHandler : IValidationRequestHandler<DayOfStayCreateRequest, DayOfStay>
 {
-    private readonly IEnumerable<IValidator<DayOfStay>> _validators;
+    private readonly IEnumerable<IValidator<DayOfStayValidateDetail>> _validators;
 
-    public DayOfStayCreateHandler(IEnumerable<IValidator<DayOfStay>> validators)
+    public DayOfStayCreateHandler(IEnumerable<IValidator<DayOfStayValidateDetail>> validators)
     {
         _validators = validators;
     }
@@ -25,7 +25,8 @@ public sealed class DayOfStayCreateHandler : IValidationRequestHandler<DayOfStay
             ExitDate = request.ExitDate
         };
 
-        var result = await _validators.ValidateAsync(createEntity, cancellationToken);
+        var validateDetail = new DayOfStayValidateDetail(createEntity, request.ExcludeEntities, request.AdditionalDayOfStays);
+        var result = await _validators.ValidateAsync(validateDetail, cancellationToken);
         return result.Map(_ => createEntity);
     }
 }

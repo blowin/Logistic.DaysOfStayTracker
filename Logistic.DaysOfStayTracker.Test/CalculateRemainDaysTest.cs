@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
+using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;
@@ -84,7 +85,7 @@ public class CalculateRemainDaysTest
         var upsertRequest = new DriverUpsertRequest { Id = driver.Id };
         foreach (var (from, to) in dates)
         {
-            var createRequest = new DayOfStayCreateRequest(driver.Id, from, to);
+            var createRequest = new DayOfStayCreateRequest(driver.Id, from, to, Array.Empty<Guid>(), Array.Empty<DayOfStay>());
             var res = await mediator.Send(createRequest);
             upsertRequest.CreateDayOfStays.Add(res.Value);
         }

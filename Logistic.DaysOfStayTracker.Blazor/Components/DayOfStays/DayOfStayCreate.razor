@@ -1,6 +1,7 @@
 ﻿@using MediatR
 @using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands
 @using Logistic.DaysOfStayTracker.Core.DayOfStays
+@using Logistic.DaysOfStayTracker.Core.Drivers.Commands
 <MudGrid>
     @if (_errorMessage.Count > 0)
     {
@@ -39,9 +40,9 @@
     
     [Inject]
     public IMediator Mediator { get; set; } = null!;
-    
+
     [Parameter]
-    public Guid DriverId { get; set; }
+    public DriverUpsertRequest DriverUpsertRequest { get; set; } = null!;
 
     [Parameter]
     public EventCallback<DayOfStay> OnCreated { get; set; }
@@ -60,11 +61,12 @@
             return;
         }
 
-        var request = new DayOfStayCreateRequest(DriverId,
+        var request = new DayOfStayCreateRequest(DriverUpsertRequest.Id ?? Guid.Empty,
             DateOnly.FromDateTime(_entryDate.Value.ToLocalTime()),
-            DateOnly.FromDateTime(_exitDate.Value.ToLocalTime())
-            );
-        
+            DateOnly.FromDateTime(_exitDate.Value.ToLocalTime()),
+                DriverUpsertRequest.DeletedDayOfStays.Keys,
+                DriverUpsertRequest.CreateDayOfStays);
+
         var createResult = await Mediator.Send(request);
         
         if (createResult.IsFailure)
