@@ -17,53 +17,6 @@ namespace Logistic.DaysOfStayTracker.Migration.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.3");
 
-            modelBuilder.Entity("Logistic.DaysOfStayTracker.Core.Countries.Country", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("TimeEdit")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATETIME('now')");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Countries");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("f9f17b9c-e040-4e13-b9be-22ed42cce9fd"),
-                            Name = "Польша",
-                            TimeEdit = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("766841f2-d35c-44d7-8fbb-a94c28248a3e"),
-                            Name = "Эстония",
-                            TimeEdit = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("7dcbf40c-3a53-434a-b9a8-cd728081bc36"),
-                            Name = "Литва",
-                            TimeEdit = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        },
-                        new
-                        {
-                            Id = new Guid("e3524c41-5b12-42e0-beef-355f36005930"),
-                            Name = "Латвия",
-                            TimeEdit = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
-                        });
-                });
-
             modelBuilder.Entity("Logistic.DaysOfStayTracker.Core.DayOfStays.DayOfStay", b =>
                 {
                     b.Property<Guid>("Id")
@@ -73,30 +26,15 @@ namespace Logistic.DaysOfStayTracker.Migration.Migrations
                     b.Property<Guid>("DriverId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("EntryCountryId")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateOnly>("EntryDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ExitCountryId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateOnly>("ExitDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("TimeEdit")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATETIME('now')");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId");
-
-                    b.HasIndex("EntryCountryId");
-
-                    b.HasIndex("ExitCountryId");
 
                     b.ToTable("DayOfStays");
                 });
@@ -117,10 +55,8 @@ namespace Logistic.DaysOfStayTracker.Migration.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("TimeEdit")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATETIME('now')");
+                    b.Property<DateOnly?>("VisaExpiryDate")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -134,22 +70,6 @@ namespace Logistic.DaysOfStayTracker.Migration.Migrations
                         .HasForeignKey("DriverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Logistic.DaysOfStayTracker.Core.Countries.Country", "EntryCountry")
-                        .WithMany()
-                        .HasForeignKey("EntryCountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Logistic.DaysOfStayTracker.Core.Countries.Country", "ExitCountry")
-                        .WithMany()
-                        .HasForeignKey("ExitCountryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EntryCountry");
-
-                    b.Navigation("ExitCountry");
                 });
 #pragma warning restore 612, 618
         }

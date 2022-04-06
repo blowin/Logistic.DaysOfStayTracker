@@ -9,5 +9,6 @@ public class DriverConfiguration : EntityConfiguration<Driver>
     {
         builder.Property(e => e.FirstName).HasMaxLength(32).IsRequired();
         builder.Property(e => e.LastName).HasMaxLength(32).IsRequired();
+        builder.Property(e => e.VisaExpiryDate);
     }
 }

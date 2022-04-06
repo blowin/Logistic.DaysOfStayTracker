@@ -46,16 +46,6 @@ namespace Logistic.DaysOfStayTracker.Migration.Migrations
                 name: "IX_DayOfStays_DriverId",
                 table: "DayOfStays",
                 column: "DriverId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DayOfStays_EntryCountryId",
-                table: "DayOfStays",
-                column: "EntryCountryId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DayOfStays_ExitCountryId",
-                table: "DayOfStays",
-                column: "ExitCountryId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

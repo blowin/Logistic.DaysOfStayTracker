@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -28,7 +27,8 @@ public class DriverUpsertTest
         var createRequest = new DriverUpsertRequest
         {
             FirstName = "First",
-            LastName = "Last"
+            LastName = "Last",
+            VisaExpiryDate = new DateTime(2001, 2, 2)
         };
 
         var response = await mediator.Send(createRequest);
@@ -41,5 +41,6 @@ public class DriverUpsertTest
         var driver = response.Value;
         Assert.Equal(createRequest.FirstName, driver.FirstName);
         Assert.Equal(createRequest.LastName, driver.LastName);
+        Assert.Equal(createRequest.VisaExpiryDate == null ? null : DateOnly.FromDateTime(createRequest.VisaExpiryDate.Value), driver.VisaExpiryDate);
     }
 }
