@@ -19,8 +19,7 @@
                     <MudText Align="Align.Center" Color="Color.Warning">Внимание! Были изменения в датах, для корретного подсчёта, сохраните данные и откройте запись повторно.</MudText>
                 }
                 <CalculateRemainDaysComponent RemainDays="@_calculateRemainDaysResponse.RemainDays"
-                                              DateOfAddDays="@_calculateRemainDaysResponse.DateOfAddDays"
-                                              AddDays="@_calculateRemainDaysResponse.AddDays"/>
+                                              AdditionalDates="@_calculateRemainDaysResponse.AdditionDates"/>
             </MudItem>
         }
         <MudItem xs="6">

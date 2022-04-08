@@ -1,4 +1,5 @@
-﻿using Logistic.DaysOfStayTracker.Core.Extension;
+﻿using System.Text;
+using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,7 +7,65 @@ namespace Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
 
 public record CalculateRemainDaysRequest(Guid DriverId, DateOnly Date) : IRequest<CalculateRemainDaysResponse>;
 
-public record CalculateRemainDaysResponse(int RemainDays, DateOnly? DateOfAddDays, int AddDays);
+public class CalculateRemainDaysResponse : IEquatable<CalculateRemainDaysResponse>
+{
+    public CalculateRemainDaysResponse(int remainDays, (DateOnly? DateOfAddDays, int AddDays)[] additionDates)
+    {
+        RemainDays = remainDays;
+        AdditionDates = additionDates;
+    }
+
+    public int RemainDays { get; }
+    public (DateOnly? DateOfAddDays, int AddDays)[] AdditionDates { get; }
+    
+    public bool Equals(CalculateRemainDaysResponse? other)
+    {
+        if (ReferenceEquals(null, other)) 
+            return false;
+        if (ReferenceEquals(this, other)) 
+            return true;
+        if(AdditionDates.Length != other.AdditionDates.Length)
+            return false;
+        
+        return RemainDays == other.RemainDays && 
+               (AdditionDates.Length == 0 || AdditionDates.SequenceEqual(other.AdditionDates));
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is CalculateRemainDaysResponse crd && Equals(crd);
+    }
+    
+    public override int GetHashCode()
+    {
+        if(AdditionDates.Length == 0)
+            return RemainDays.GetHashCode();
+
+        var additionalDateHashCode = AdditionDates.Aggregate(0, HashCode.Combine);
+        return HashCode.Combine(RemainDays, additionalDateHashCode);
+    }
+
+    public override string ToString()
+    {
+        var messageBuilder = new StringBuilder(52);
+        messageBuilder.AppendLine("{");
+        
+        messageBuilder.AppendFormat("\tRemainDays = {0}", RemainDays);
+        messageBuilder.Append("\tAdditionDates = [");
+        for (var index = 0; index < AdditionDates.Length; index++)
+        {
+            var (date, days) = AdditionDates[index];
+            if(index > 0)
+                messageBuilder.Append(", ");
+            messageBuilder.AppendFormat("(Date = {0}, Days = {1})", date, days);
+        }
+
+        messageBuilder.AppendLine("]");
+        
+        messageBuilder.Append("}");
+        return messageBuilder.ToString();
+    }
+}
 
 public sealed class CalculateRemainDaysHandler 
     : IRequestHandler<CalculateRemainDaysRequest, CalculateRemainDaysResponse>
@@ -22,33 +81,46 @@ public sealed class CalculateRemainDaysHandler
     {
         var dates = await DateRangesFromRangeAsync(request, cancellationToken);
         var remainDay = MaxDaysInYear - Sum(dates);
-        
-        var additionalDate = CalculateAdditionalDate(request, dates);
-        return additionalDate.ToResponse(remainDay);
+        var additionalDates = CalculateAdditionalDates(request, dates);
+        return ToResponse(additionalDates, remainDay);
     }
 
-    private static AdditionalDate CalculateAdditionalDate(CalculateRemainDaysRequest request, List<DateRange> dates)
+    private static CalculateRemainDaysResponse ToResponse(AdditionalDate[] additionalDates, double remainDay)
+    {
+        foreach (var additionalDate in additionalDates)
+            remainDay = additionalDate.RemainDays(remainDay);
+
+        return new CalculateRemainDaysResponse((int)remainDay, 
+            additionalDates.Select(r => (r.Date, r.Days)).ToArray());
+    }
+    
+    private static AdditionalDate[] CalculateAdditionalDates(CalculateRemainDaysRequest request, List<DateRange> dates)
     {
         var halfOfYearAgo = request.Date.AddDays(-CheckRangeInDays);
         
         var additionalRange = dates.FirstOrDefault(e => e.EntryDate <= halfOfYearAgo && halfOfYearAgo <= e.ExitDate);
         if (additionalRange != null)
         {
-            var entryDate = additionalRange.EntryDate;
-            additionalRange = additionalRange with {EntryDate = additionalRange.EntryDate.Max(halfOfYearAgo)};
-            var additionalDate = additionalRange.EntryDate.AddDays(1).AddDays(CheckRangeInDays);
-            var additionalInEuropeDateRange = new DateRangeValueType(entryDate, additionalRange.EntryDate);
-            return AdditionalDate.Europe(additionalDate, additionalRange.TotalDays - 1, additionalInEuropeDateRange.TotalDays);   
+            var nextRange = dates.FirstOrDefault(e => e != additionalRange);
+            if (nextRange == null)
+                return new[]
+                {
+                    AdditionalDate.ForEuropeAdditionalDate(additionalRange, halfOfYearAgo)
+                };
+            
+            return new []
+            {
+                AdditionalDate.ForEuropeAdditionalDate(additionalRange, halfOfYearAgo),
+                AdditionalDate.ForNonEuropeAdditionalDate(nextRange), 
+            };   
         }
 
-        var firstAdditionalRange = dates.FirstOrDefault(e => e.EntryDate > halfOfYearAgo);
-        if (firstAdditionalRange != null)
-        {
-            var additionalDate = firstAdditionalRange.EntryDate.AddDays(CheckRangeInDays);
-            return AdditionalDate.NonEurope(additionalDate, firstAdditionalRange.TotalDays);
-        }
+        var nonEuropeRange = dates.Where(e => e.EntryDate > halfOfYearAgo)
+            .Take(2)
+            .Select(AdditionalDate.ForNonEuropeAdditionalDate)
+            .ToArray();
         
-        return AdditionalDate.NonEurope(null, 0);
+        return nonEuropeRange.Length > 0 ? nonEuropeRange : new []{ AdditionalDate.Empty };
     }
     
     private Task<List<DateRange>> DateRangesFromRangeAsync(CalculateRemainDaysRequest request, CancellationToken cancellationToken)
@@ -71,40 +143,31 @@ public sealed class CalculateRemainDaysHandler
             .Sum();
     }
     
-    private readonly record struct AdditionalDate
+    private readonly record struct AdditionalDate(DateOnly? Date, int Days, bool BeenInEurope, int DaysInEurope)
     {
-        private AdditionalDate(DateOnly? date, int days, bool beenInEurope, int daysInEurope)
-        {
-            Date = date;
-            Days = days;
-            BeenInEurope = beenInEurope;
-            DaysInEurope = daysInEurope;
-        }
-
-        public DateOnly? Date { get; init; }
-        public int Days { get; init; }
+        public static AdditionalDate Empty => new(null, 0, false, 0);
         
-        private bool BeenInEurope { get; init; }
-        private int DaysInEurope { get; init; }
-        
-        public CalculateRemainDaysResponse ToResponse(double actualRemainDays)
-        {
-            var remainDays = (int)RemainDays(actualRemainDays);
-            return new CalculateRemainDaysResponse(remainDays, Date, Days);
-        }
-        
-        private double RemainDays(double actualRemainDays)
+        public double RemainDays(double actualRemainDays)
         {
             if (BeenInEurope)
                 return actualRemainDays + DaysInEurope;
             return actualRemainDays;
         }
         
-        public static AdditionalDate NonEurope(DateOnly? date, int additionalDays) =>
-            new(date, additionalDays, false, 0);
-        
-        public static AdditionalDate Europe(DateOnly? date, int additionalDays, int inEuropeDays) =>
-            new(date, additionalDays, true, inEuropeDays);
+        public static AdditionalDate ForNonEuropeAdditionalDate(DateRange range)
+        {
+            var additionalDate = range.EntryDate.AddDays(CheckRangeInDays);
+            return new(additionalDate, range.TotalDays, false, 0);
+        }
+    
+        public static AdditionalDate ForEuropeAdditionalDate(DateRange additionalRange, DateOnly halfOfYearAgo)
+        {
+            var entryDate = additionalRange.EntryDate;
+            additionalRange = additionalRange with {EntryDate = additionalRange.EntryDate.Max(halfOfYearAgo)};
+            var additionalDate = additionalRange.EntryDate.AddDays(1).AddDays(CheckRangeInDays);
+            var additionalInEuropeDateRange = new DateRangeValueType(entryDate, additionalRange.EntryDate);
+            return new(additionalDate, additionalRange.TotalDays - 1, true, additionalInEuropeDateRange.TotalDays);   
+        }
     }
 }
 

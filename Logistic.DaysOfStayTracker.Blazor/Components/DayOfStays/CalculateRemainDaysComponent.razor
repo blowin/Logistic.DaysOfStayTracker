@@ -1,17 +1,17 @@
 ﻿<MudCard>
     <MudCardContent>
         <MudText Typo="Typo.h6" Align="Align.Center">На данный момент осталось @RemainDays дней.</MudText>
-        <MudText Typo="Typo.h6" Align="Align.Center">C @DateOfAddDays будет добавляться @AddDays дней.</MudText>
+        @foreach (var (dateOfAddDays, addDays) in AdditionalDates)
+        {
+            <MudText Typo="Typo.h6" Align="Align.Center">C @dateOfAddDays будет добавляться @addDays дней.</MudText>   
+        }
     </MudCardContent>
 </MudCard>
 
 @code {
     [Parameter]
     public int RemainDays { get; set; }
-    
+
     [Parameter]
-    public DateOnly? DateOfAddDays { get; set; }
-    
-    [Parameter]
-    public int AddDays { get; set; }
+    public (DateOnly? DateOfAddDays, int AddDays)[] AdditionalDates { get; set; } = Array.Empty<(DateOnly?, int)>();
 }
