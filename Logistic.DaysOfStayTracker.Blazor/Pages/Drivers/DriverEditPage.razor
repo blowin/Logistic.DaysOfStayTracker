@@ -3,6 +3,9 @@
 <MudCard>
     <MudGrid Class="mt-4 my-4">
         <MudItem xl="12" xs="12" xxl="12">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@Cancel">←</MudButton>
+        </MudItem>
+        <MudItem xl="12" xs="12" xxl="12">
             @foreach (var error in _errors)
             {
                 <MudText Color="Color.Error">@error</MudText>
@@ -20,7 +23,7 @@
                                               AddDays="@_calculateRemainDaysResponse.AddDays"/>
             </MudItem>
         }
-         <MudItem xs="6">
+        <MudItem xs="6">
             <MudTextField @bind-Value="_model.FirstName" For="@(() => _model.FirstName)" Immediate="true" Label="Имя"></MudTextField>
         </MudItem>
         <MudItem xs="6">
