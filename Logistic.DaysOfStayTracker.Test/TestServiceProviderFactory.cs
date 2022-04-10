@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
+using Logistic.DaysOfStayTracker.Core.Common;
+using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using Logistic.DaysOfStayTracker.DependencyInjection;
 using MediatR;
@@ -29,28 +31,35 @@ public class TestServiceProviderFactory
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.EnsureCreatedAsync();
 
+        Driver? driver = null;
         if (AddDriver)
         {
-            await scope.ServiceProvider.GetRequiredService<IMediator>().Send(new DriverUpsertRequest
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var upsertResult = await mediator.Send(new DriverUpsertRequest
             {
                 FirstName = "Андрей",
-                LastName = "Покров"
-            });   
+                LastName = "Покров",
+                VisaExpiryDate = UpdateProperty.ChangedNullable(new DateTime(2000, 1, 1))
+            });
+            driver = upsertResult.Value;
         }
 
-        return new CreateScope(provider, connection);
+        return new CreateScope(provider, connection, driver);
     }
     
     public class CreateScope : IDisposable
     {
         private SqliteConnection _connection;
         
+        public Driver? Driver { get; private set; }
+        
         public IServiceProvider Provider { get; }
         
-        public CreateScope(IServiceProvider provider, SqliteConnection connection)
+        public CreateScope(IServiceProvider provider, SqliteConnection connection, Driver? driver)
         {
             Provider = provider;
             _connection = connection;
+            Driver = driver;
         }
 
         public void Dispose()

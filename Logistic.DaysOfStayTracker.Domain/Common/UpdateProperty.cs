@@ -4,7 +4,10 @@ public static class UpdateProperty
 {
     public static UpdateProperty<T> Changed<T>(T value) => new(value, true);
     
-    public static UpdateProperty<T> NonChanged<T>() => new(default, true);
+    public static UpdateProperty<T?> ChangedNullable<T>(T value) where T : struct
+        => new(value, true);
+    
+    public static UpdateProperty<T> NonChanged<T>() => new(default, false);
 }
 
 public sealed class UpdateProperty<T> : IEquatable<UpdateProperty<T>>
