@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
@@ -94,12 +95,12 @@ public class CalculateRemainDaysTest
         var driver = db.Drivers.First();
             
         // init
-        var upsertRequest = new DriverUpsertRequest { Id = driver.Id };
+        var validators = sp.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
+        var upsertRequest = new DriverUpsertRequest(validators) { Id = driver.Id };
         foreach (var (from, to) in dates)
         {
-            var createRequest = new DayOfStayCreateRequest(driver.Id, from, to, Array.Empty<Guid>(), Array.Empty<DayOfStay>());
-            var res = await mediator.Send(createRequest);
-            upsertRequest.CreateDayOfStays.Add(res.Value);
+            var res = await upsertRequest.AddCreateDayOfStayAsync(driver.Id, from, to);
+            _ = res.Value;
         }
         await mediator.Send(upsertRequest);
         

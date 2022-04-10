@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Common;
+using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using X.PagedList;
 using Xunit;
 
 namespace Logistic.DaysOfStayTracker.Test;
@@ -21,7 +25,8 @@ public class DriverUpsertTest
         await using var scope = createScope.Provider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
-        var updateRequest = new DriverUpsertRequest
+        var validators = scope.ServiceProvider.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
+        var updateRequest = new DriverUpsertRequest(validators)
         {
             Id = createScope.Driver!.Id,
             FirstName = "First",
@@ -49,7 +54,8 @@ public class DriverUpsertTest
         await using var scope = createScope.Provider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
-        var updateRequest = new DriverUpsertRequest
+        var validators = scope.ServiceProvider.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
+        var updateRequest = new DriverUpsertRequest(validators)
         {
             Id = createScope.Driver!.Id,
             FirstName = "First",
@@ -83,15 +89,20 @@ public class DriverUpsertTest
         var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var driverCount = ctx.Drivers.Count();
 
-        var createRequest = new DriverUpsertRequest
+        var validators = scope.ServiceProvider.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
+        var createRequest = new DriverUpsertRequest(validators)
         {
             FirstName = "First",
             LastName = "Last",
             VisaExpiryDate = UpdateProperty.Changed<DateTime?>(new DateTime(2001, 2, 2))
         };
 
+        var r = await createRequest.AddCreateDayOfStayAsync(Guid.Empty, new DateOnly(2000, 1, 1), new DateOnly(2000, 1, 5));
+        _ = r.Value;
+
         var response = await mediator.Send(createRequest);
         var driveCountAfterRequest = ctx.Drivers.Count();
+        var dayOfStays = await ctx.DayOfStays.ToListAsync();
         
         Assert.True(response.IsSuccess, "response.IsSuccess");
         Assert.Equal(0, driverCount);
@@ -101,5 +112,9 @@ public class DriverUpsertTest
         Assert.Equal(createRequest.FirstName, driver.FirstName);
         Assert.Equal(createRequest.LastName, driver.LastName);
         Assert.Equal(createRequest.VisaExpiryDate.Value == null ? null : DateOnly.FromDateTime(createRequest.VisaExpiryDate.Value.Value), driver.VisaExpiryDate);
+        
+        Assert.Single(dayOfStays);
+        Assert.Equal(new DateOnly(2000, 1, 1), dayOfStays[0].EntryDate);
+        Assert.Equal(new DateOnly(2000, 1, 5), dayOfStays[0].ExitDate);
     }
 }

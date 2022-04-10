@@ -11,6 +11,13 @@ namespace Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 
 public class DriverUpsertRequest : IValidationRequest<Driver>
 {
+    private readonly IEnumerable<IValidator<DayOfStayValidateDetail>> _dayOfStayValidators;
+
+    public DriverUpsertRequest(IEnumerable<IValidator<DayOfStayValidateDetail>> dayOfStayValidators)
+    {
+        _dayOfStayValidators = dayOfStayValidators;
+    }
+
     public Guid? Id { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
@@ -29,6 +36,25 @@ public class DriverUpsertRequest : IValidationRequest<Driver>
 
         DeletedDayOfStays.Add(dayOfStay.Id, dayOfStay);
     }
+
+    public async Task<Result<DayOfStay, ICollection<string>>> AddCreateDayOfStayAsync(Guid driverId, DateOnly entryDate, DateOnly exitDate,
+        CancellationToken cancellationToken = default)
+    {
+        var createEntity = new DayOfStay
+        {
+            DriverId = driverId,
+            EntryDate = entryDate,
+            ExitDate = exitDate
+        };
+
+        var validateDetail = new DayOfStayValidateDetail(createEntity, DeletedDayOfStays.Keys, CreateDayOfStays);
+        var result = await _dayOfStayValidators.ValidateAsync(validateDetail, cancellationToken);
+        
+        if (result.IsSuccess)
+            CreateDayOfStays.Add(createEntity);
+        
+        return result.Map(_ => createEntity);
+    }
 }
 
 public record DriverUpsertModelGet(Guid Id) : IRequest<DriverUpsertRequest>;
@@ -37,10 +63,10 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
 {
     private readonly AppDbContext _db;
     private readonly IEnumerable<IValidator<Driver>> _driverValidators;
-    private readonly IEnumerable<IValidator<DayOfStay>> _dayOfStayValidators;
+    private readonly IEnumerable<IValidator<DayOfStayValidateDetail>> _dayOfStayValidators;
     private readonly ILogger<DriverUpsertHandler> _logger;
 
-    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> driverValidators, IEnumerable<IValidator<DayOfStay>> dayOfStayValidators, 
+    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> driverValidators, IEnumerable<IValidator<DayOfStayValidateDetail>> dayOfStayValidators, 
         ILogger<DriverUpsertHandler> logger)
     {
         _db = db;
@@ -97,19 +123,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             }
 
             if (request.CreateDayOfStays.Count > 0)
-            {
                 await _db.DayOfStays.AddRangeAsync(request.CreateDayOfStays, cancellationToken);
-
-                foreach (var createDayOfStay in request.CreateDayOfStays)
-                {
-                    var dayOfStayValidateResult = await _dayOfStayValidators.ValidateAsync(createDayOfStay, cancellationToken);
-                    if (dayOfStayValidateResult.IsSuccess)
-                        continue;
-                    
-                    await transaction.RollbackAsync(cancellationToken);
-                    return Result.Failure<Driver, ICollection<string>>(dayOfStayValidateResult.Error);
-                }
-            }
 
             await _db.SaveChangesAsync(cancellationToken);
             
@@ -125,8 +139,9 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
 
     public async Task<DriverUpsertRequest> Handle(DriverUpsertModelGet request, CancellationToken cancellationToken)
     {
+        
         var driver = await _db.Drivers.FirstAsync(r => r.Id == request.Id, cancellationToken);
-        return new DriverUpsertRequest
+        return new DriverUpsertRequest(_dayOfStayValidators)
         {
             Id = driver.Id,
             FirstName= driver.FirstName,

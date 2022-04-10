@@ -61,21 +61,17 @@
             return;
         }
 
-        var request = new DayOfStayCreateRequest(DriverUpsertRequest.Id ?? Guid.Empty,
+        var result = await DriverUpsertRequest.AddCreateDayOfStayAsync(DriverUpsertRequest.Id ?? Guid.Empty,
             DateOnly.FromDateTime(_entryDate.Value.ToLocalTime()),
-            DateOnly.FromDateTime(_exitDate.Value.ToLocalTime()),
-                DriverUpsertRequest.DeletedDayOfStays.Keys,
-                DriverUpsertRequest.CreateDayOfStays);
-
-        var createResult = await Mediator.Send(request);
+            DateOnly.FromDateTime(_exitDate.Value.ToLocalTime()));
         
-        if (createResult.IsFailure)
+        if (result.IsFailure)
         {
-            _errorMessage = createResult.Error;
+            _errorMessage = result.Error;
             return;
         }
 
-        await OnCreated.InvokeAsync(createResult.Value);
+        await OnCreated.InvokeAsync(result.Value);
         
         _errorMessage = Array.Empty<string>();
         _exitDate = null;

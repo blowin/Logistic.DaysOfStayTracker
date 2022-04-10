@@ -22,7 +22,7 @@ public partial class DayOfStayTable
     public DayOfStaySearchRequest SearchRequest { get; set; } = null!;
 
     [Parameter]
-    public DriverUpsertRequest DriverUpsertRequest { get; set; } = new();
+    public DriverUpsertRequest DriverUpsertRequest { get; set; } = null!;
 
     [Inject]
     public IDialogService DialogService { get; set; } = null!;
@@ -61,7 +61,6 @@ public partial class DayOfStayTable
 
     private void AddDayOfStay(DayOfStay createModel)
     {
-        DriverUpsertRequest.CreateDayOfStays.Add(createModel);
         _items.Add(createModel);
     }
 }
