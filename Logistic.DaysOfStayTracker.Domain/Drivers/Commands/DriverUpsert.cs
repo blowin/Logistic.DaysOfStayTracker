@@ -14,7 +14,7 @@ public class DriverUpsertRequest : IValidationRequest<Driver>
     public Guid? Id { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
-    public DateTime? VisaExpiryDate { get; set; }
+    public UpdateProperty<DateTime?> VisaExpiryDate { get; set; } = UpdateProperty.NonChanged<DateTime?>();
 
     public Dictionary<Guid, DayOfStay> DeletedDayOfStays { get; } = new();
 
@@ -61,7 +61,11 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
         if(!string.IsNullOrEmpty(request.LastName))
             driver.LastName = request.LastName;
 
-        driver.VisaExpiryDate = request.VisaExpiryDate == null ? null : DateOnly.FromDateTime(request.VisaExpiryDate.Value);
+        if (request.VisaExpiryDate.IsChanged)
+        {
+            var date = request.VisaExpiryDate.Value;
+            driver.VisaExpiryDate = date == null ? null : DateOnly.FromDateTime(date.Value);   
+        }
 
         var result = await _driverValidators.ValidateAsync(driver, cancellationToken);
         if (result.IsFailure)
@@ -127,7 +131,7 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
             Id = driver.Id,
             FirstName= driver.FirstName,
             LastName = driver.LastName,
-            VisaExpiryDate = driver.VisaExpiryDate?.AsDateTime(),
+            VisaExpiryDate = UpdateProperty.Changed(driver.VisaExpiryDate?.AsDateTime()),
         };
     }
 }

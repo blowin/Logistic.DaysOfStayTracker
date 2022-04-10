@@ -29,7 +29,8 @@
             <MudTextField @bind-Value="_model.LastName" For="@(() => _model.LastName)" Immediate="true" Label="Фамилия"></MudTextField>
         </MudItem>
         <MudItem xs="2">
-            <MudDatePicker @bind-Date="@_model.VisaExpiryDate" PickerVariant="PickerVariant.Dialog" Editable="true" Label="Виза до"/>
+            <MudDatePicker Date="@_model.VisaExpiryDate.Value" 
+                           DateChanged="@(v => _model.VisaExpiryDate.Change(v))" PickerVariant="PickerVariant.Dialog" Editable="true" Label="Виза до"/>
         </MudItem>
         <MudItem xl="12" xs="12" xxl="12">
             <DayOfStayTable @ref="_dayOfStayTable" SearchRequest="_dayOfStaySearchRequest" DriverUpsertRequest="_model"></DayOfStayTable>
