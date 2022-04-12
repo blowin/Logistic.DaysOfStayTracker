@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Logistic.DaysOfStayTracker.Core;
-using Logistic.DaysOfStayTracker.Core.Common;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using Logistic.DaysOfStayTracker.DependencyInjection;
@@ -34,13 +33,11 @@ public class TestServiceProviderFactory
         Driver? driver = null;
         if (AddDriver)
         {
+            var request = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>()
+                .WithName("Андрей", "Покров")
+                .WithExpiryDate(new DateTime(2000, 1, 1));
+         
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            
-            var request = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
-            request.FirstName = "Андрей";
-            request.LastName = "Покров";
-            request.VisaExpiryDate = UpdateProperty.ChangedNullable(new DateTime(2000, 1, 1));
-            
             var upsertResult = await mediator.Send(request);
             driver = upsertResult.Value;
         }

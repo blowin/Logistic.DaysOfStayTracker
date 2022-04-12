@@ -29,6 +29,39 @@ public class DriverUpsertRequest : IValidationRequest<Driver>
     public HashSet<DayOfStay> CreateDayOfStays { get; } = new();
 
     public bool HasDeleteOrCreateDateOfStays => DeletedDayOfStays.Count > 0 || CreateDayOfStays.Count > 0;
+
+    public DriverUpsertRequest For(Driver driver)
+    {
+        Id = driver.Id;
+        FirstName = driver.FirstName;
+        LastName = driver.LastName;
+        VisaExpiryDate = UpdateProperty.Changed(driver.VisaExpiryDate?.AsDateTime());
+        return this;
+    }
+
+    public DriverUpsertRequest WithId(Guid id)
+    {
+        Id = id;
+        return this;
+    }
+    
+    public DriverUpsertRequest WithName(string firstName, string lastName)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        return this;
+    }
+    
+    public DriverUpsertRequest WithExpiryDate(DateOnly? expiryDate)
+    {
+        return WithExpiryDate(expiryDate?.AsDateTime());
+    }
+    
+    public DriverUpsertRequest WithExpiryDate(DateTime? expiryDate)
+    {
+        VisaExpiryDate = UpdateProperty.Changed(expiryDate);
+        return this;
+    }
     
     public void AddDeletedDayOfStay(DayOfStay dayOfStay)
     {
@@ -141,12 +174,6 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
     public async Task<DriverUpsertRequest> Handle(DriverUpsertModelGet request, CancellationToken cancellationToken)
     {
         var driver = await _db.Drivers.FirstAsync(r => r.Id == request.Id, cancellationToken);
-        
-        var upsertRequest = _serviceProvider.GetRequiredService<DriverUpsertRequest>();
-        upsertRequest.Id = driver.Id;
-        upsertRequest.FirstName = driver.FirstName;
-        upsertRequest.LastName = driver.LastName;
-        upsertRequest.VisaExpiryDate = UpdateProperty.Changed(driver.VisaExpiryDate?.AsDateTime());
-        return upsertRequest;
+        return _serviceProvider.GetRequiredService<DriverUpsertRequest>().For(driver);
     }
 }

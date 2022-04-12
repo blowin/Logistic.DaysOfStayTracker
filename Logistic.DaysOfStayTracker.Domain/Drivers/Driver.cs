@@ -1,5 +1,4 @@
 ﻿using Logistic.DaysOfStayTracker.Core.Common;
-using Logistic.DaysOfStayTracker.Core.Extension;
 
 namespace Logistic.DaysOfStayTracker.Core.Drivers;
 

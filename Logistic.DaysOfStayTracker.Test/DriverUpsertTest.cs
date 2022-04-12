@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentValidation;
 using Logistic.DaysOfStayTracker.Core;
-using Logistic.DaysOfStayTracker.Core.Common;
-using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
@@ -25,10 +21,9 @@ public class DriverUpsertTest
         await using var scope = createScope.Provider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-        var updateRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
-        updateRequest.Id = createScope.Driver!.Id;
-        updateRequest.FirstName = "First";
-        updateRequest.LastName = "Last";
+        var updateRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>()
+            .WithId(createScope.Driver!.Id)
+            .WithName("First", "Last");
 
         var response = await mediator.Send(updateRequest);
         
@@ -51,11 +46,10 @@ public class DriverUpsertTest
         await using var scope = createScope.Provider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
-        var updateRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
-        updateRequest.Id = createScope.Driver!.Id;
-        updateRequest.FirstName = "First";
-        updateRequest.LastName = "Last";
-        updateRequest.VisaExpiryDate = UpdateProperty.Changed<DateTime?>(new DateTime(2020, 1, 1));
+        var updateRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>()
+            .WithId(createScope.Driver!.Id)
+            .WithName("First", "Last")
+            .WithExpiryDate(new DateTime(2020, 1, 1));
 
         var response = await mediator.Send(updateRequest);
         
@@ -83,10 +77,9 @@ public class DriverUpsertTest
         var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var driverCount = ctx.Drivers.Count();
 
-        var createRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
-        createRequest.FirstName = "First";
-        createRequest.LastName = "Last";
-        createRequest.VisaExpiryDate = UpdateProperty.Changed<DateTime?>(new DateTime(2001, 2, 2));
+        var createRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>()
+            .WithName("First", "Last")
+            .WithExpiryDate(new DateTime(2001, 2, 2));
         
         var r = await createRequest.AddCreateDayOfStayAsync(Guid.Empty, new DateOnly(2000, 1, 1), new DateOnly(2000, 1, 5));
         _ = r.Value;
