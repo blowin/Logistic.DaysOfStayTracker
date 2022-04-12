@@ -5,6 +5,7 @@ using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Extension;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Logistic.DaysOfStayTracker.Core.Drivers.Commands;
@@ -63,16 +64,16 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
 {
     private readonly AppDbContext _db;
     private readonly IEnumerable<IValidator<Driver>> _driverValidators;
-    private readonly IEnumerable<IValidator<DayOfStayValidateDetail>> _dayOfStayValidators;
     private readonly ILogger<DriverUpsertHandler> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
-    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> driverValidators, IEnumerable<IValidator<DayOfStayValidateDetail>> dayOfStayValidators, 
-        ILogger<DriverUpsertHandler> logger)
+    public DriverUpsertHandler(AppDbContext db, IEnumerable<IValidator<Driver>> driverValidators, 
+        ILogger<DriverUpsertHandler> logger, IServiceProvider serviceProvider)
     {
         _db = db;
         _driverValidators = driverValidators;
         _logger = logger;
-        _dayOfStayValidators = dayOfStayValidators;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<Result<Driver, ICollection<string>>> Handle(DriverUpsertRequest request, CancellationToken cancellationToken)
@@ -139,14 +140,13 @@ public sealed class DriverUpsertHandler : IValidationRequestHandler<DriverUpsert
 
     public async Task<DriverUpsertRequest> Handle(DriverUpsertModelGet request, CancellationToken cancellationToken)
     {
-        
         var driver = await _db.Drivers.FirstAsync(r => r.Id == request.Id, cancellationToken);
-        return new DriverUpsertRequest(_dayOfStayValidators)
-        {
-            Id = driver.Id,
-            FirstName= driver.FirstName,
-            LastName = driver.LastName,
-            VisaExpiryDate = UpdateProperty.Changed(driver.VisaExpiryDate?.AsDateTime()),
-        };
+        
+        var upsertRequest = _serviceProvider.GetRequiredService<DriverUpsertRequest>();
+        upsertRequest.Id = driver.Id;
+        upsertRequest.FirstName = driver.FirstName;
+        upsertRequest.LastName = driver.LastName;
+        upsertRequest.VisaExpiryDate = UpdateProperty.Changed(driver.VisaExpiryDate?.AsDateTime());
+        return upsertRequest;
     }
 }

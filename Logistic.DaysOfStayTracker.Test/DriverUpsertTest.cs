@@ -24,14 +24,11 @@ public class DriverUpsertTest
         
         await using var scope = createScope.Provider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        
-        var validators = scope.ServiceProvider.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
-        var updateRequest = new DriverUpsertRequest(validators)
-        {
-            Id = createScope.Driver!.Id,
-            FirstName = "First",
-            LastName = "Last"
-        };
+
+        var updateRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
+        updateRequest.Id = createScope.Driver!.Id;
+        updateRequest.FirstName = "First";
+        updateRequest.LastName = "Last";
 
         var response = await mediator.Send(updateRequest);
         
@@ -54,14 +51,11 @@ public class DriverUpsertTest
         await using var scope = createScope.Provider.CreateAsyncScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
         
-        var validators = scope.ServiceProvider.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
-        var updateRequest = new DriverUpsertRequest(validators)
-        {
-            Id = createScope.Driver!.Id,
-            FirstName = "First",
-            LastName = "Last",
-            VisaExpiryDate = UpdateProperty.Changed<DateTime?>(new DateTime(2020, 1, 1))
-        };
+        var updateRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
+        updateRequest.Id = createScope.Driver!.Id;
+        updateRequest.FirstName = "First";
+        updateRequest.LastName = "Last";
+        updateRequest.VisaExpiryDate = UpdateProperty.Changed<DateTime?>(new DateTime(2020, 1, 1));
 
         var response = await mediator.Send(updateRequest);
         
@@ -89,14 +83,11 @@ public class DriverUpsertTest
         var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var driverCount = ctx.Drivers.Count();
 
-        var validators = scope.ServiceProvider.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
-        var createRequest = new DriverUpsertRequest(validators)
-        {
-            FirstName = "First",
-            LastName = "Last",
-            VisaExpiryDate = UpdateProperty.Changed<DateTime?>(new DateTime(2001, 2, 2))
-        };
-
+        var createRequest = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
+        createRequest.FirstName = "First";
+        createRequest.LastName = "Last";
+        createRequest.VisaExpiryDate = UpdateProperty.Changed<DateTime?>(new DateTime(2001, 2, 2));
+        
         var r = await createRequest.AddCreateDayOfStayAsync(Guid.Empty, new DateOnly(2000, 1, 1), new DateOnly(2000, 1, 5));
         _ = r.Value;
 

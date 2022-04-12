@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.DayOfStays.Commands;
+using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +28,9 @@ public static class DependencyInjectionExt
             .AddDbContextPool<AppDbContext>(configuration.DbConfiguration)
             .AddValidatorsFromAssembly(typeof(DayOfStaySearchRequest).Assembly)
             .AddMediatR(typeof(DayOfStaySearchRequest).Assembly)
-            .AddScoped(typeof(Repository<>));
+            .AddScoped(typeof(Repository<>))
+            
+            .AddTransient<DriverUpsertRequest>();
 
         if (configuration.LoggingConfiguration == null)
         {

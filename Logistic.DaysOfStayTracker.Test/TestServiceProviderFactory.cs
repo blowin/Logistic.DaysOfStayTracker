@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using FluentValidation;
 using Logistic.DaysOfStayTracker.Core;
 using Logistic.DaysOfStayTracker.Core.Common;
-using Logistic.DaysOfStayTracker.Core.DayOfStays;
 using Logistic.DaysOfStayTracker.Core.Drivers;
 using Logistic.DaysOfStayTracker.Core.Drivers.Commands;
 using Logistic.DaysOfStayTracker.DependencyInjection;
@@ -38,13 +35,13 @@ public class TestServiceProviderFactory
         if (AddDriver)
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var validators = scope.ServiceProvider.GetRequiredService<IEnumerable<IValidator<DayOfStayValidateDetail>>>();
-            var upsertResult = await mediator.Send(new DriverUpsertRequest(validators)
-            {
-                FirstName = "Андрей",
-                LastName = "Покров",
-                VisaExpiryDate = UpdateProperty.ChangedNullable(new DateTime(2000, 1, 1))
-            });
+            
+            var request = scope.ServiceProvider.GetRequiredService<DriverUpsertRequest>();
+            request.FirstName = "Андрей";
+            request.LastName = "Покров";
+            request.VisaExpiryDate = UpdateProperty.ChangedNullable(new DateTime(2000, 1, 1));
+            
+            var upsertResult = await mediator.Send(request);
             driver = upsertResult.Value;
         }
 

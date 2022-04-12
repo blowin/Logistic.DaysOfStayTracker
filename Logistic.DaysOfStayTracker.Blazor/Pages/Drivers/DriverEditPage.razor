@@ -14,7 +14,7 @@
         @if (_calculateRemainDaysResponse != null)
         {
             <MudItem Class="pt-4" xl="12" xs="12" xxl="12">
-                @if (_model.HasDeleteOrCreateDateOfStays)
+                @if (Model.HasDeleteOrCreateDateOfStays)
                 {
                     <MudText Align="Align.Center" Color="Color.Warning">Внимание! Были изменения в датах, для корретного подсчёта, сохраните данные и откройте запись повторно.</MudText>
                 }
@@ -23,17 +23,17 @@
             </MudItem>
         }
         <MudItem xs="6">
-            <MudTextField @bind-Value="_model.FirstName" For="@(() => _model.FirstName)" Immediate="true" Label="Имя"></MudTextField>
+            <MudTextField @bind-Value="Model.FirstName" For="@(() => Model.FirstName)" Immediate="true" Label="Имя"></MudTextField>
         </MudItem>
         <MudItem xs="6">
-            <MudTextField @bind-Value="_model.LastName" For="@(() => _model.LastName)" Immediate="true" Label="Фамилия"></MudTextField>
+            <MudTextField @bind-Value="Model.LastName" For="@(() => Model.LastName)" Immediate="true" Label="Фамилия"></MudTextField>
         </MudItem>
         <MudItem xs="2">
-            <MudDatePicker Date="@_model.VisaExpiryDate.Value" 
-                           DateChanged="@(v => _model.VisaExpiryDate.Change(v))" PickerVariant="PickerVariant.Dialog" Editable="true" Label="Виза до"/>
+            <MudDatePicker Date="@Model.VisaExpiryDate.Value" 
+                           DateChanged="@(v => Model.VisaExpiryDate.Change(v))" PickerVariant="PickerVariant.Dialog" Editable="true" Label="Виза до"/>
         </MudItem>
         <MudItem xl="12" xs="12" xxl="12">
-            <DayOfStayTable @ref="_dayOfStayTable" SearchRequest="_dayOfStaySearchRequest" DriverUpsertRequest="_model"></DayOfStayTable>
+            <DayOfStayTable @ref="_dayOfStayTable" SearchRequest="_dayOfStaySearchRequest" DriverUpsertRequest="Model"></DayOfStayTable>
         </MudItem>
     </MudGrid>
     <MudCardActions Class="pt-3">
