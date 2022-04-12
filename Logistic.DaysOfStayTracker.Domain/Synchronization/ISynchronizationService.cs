@@ -2,7 +2,7 @@
 
 namespace Logistic.DaysOfStayTracker.Core.Synchronization;
 
-public interface ISynchronizationService
+public interface ISynchronizationService : IDisposable
 {
     /// <summary>
     /// Возвращает дату последнего изменений файла БД на сервере
