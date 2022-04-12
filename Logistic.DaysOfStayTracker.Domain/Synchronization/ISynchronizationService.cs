@@ -8,7 +8,7 @@ public interface ISynchronizationService
     /// Возвращает дату последнего изменений файла БД на сервере
     /// </summary>
     /// <returns>null, если там файла нет</returns>
-    DateOnly? GetDbModificationDate();
+    Task<Result<DateOnly?>> GetDbModificationDate();
 
     /// <summary>
     /// Получает актуальный файл БД из сервера
