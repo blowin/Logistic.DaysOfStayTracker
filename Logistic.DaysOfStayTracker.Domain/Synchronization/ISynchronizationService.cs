@@ -13,10 +13,10 @@ public interface ISynchronizationService : IDisposable
     /// <summary>
     /// Получает актуальный файл БД из сервера
     /// </summary>
-    Task<Result<AppDbContext>> GetDb();
+    Task<Result<RemoteDb>> GetDb();
     
     /// <summary>
     /// Загружает новый файл БД на сервер
     /// </summary>
-    Task<Result> SaveDb(AppDbContext db);
+    Task<Result> SaveDb(RemoteDb db);
 }
